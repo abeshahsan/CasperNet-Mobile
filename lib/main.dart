@@ -12,7 +12,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<Album> futureAlbum;
+  late Future<UsageData> futureAlbum;
 
   @override
   void initState() {
@@ -33,20 +33,19 @@ class _MyAppState extends State<MyApp> {
         ),
         body: SingleChildScrollView(
           child: Center(
-            child: FutureBuilder<Album>(
+            child: FutureBuilder<UsageData>(
               future: futureAlbum,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Text(snapshot.data!.title);
+                  return Text(snapshot.data!.toString());
                 } else if (snapshot.hasError) {
                   return Text('${snapshot.error}');
                 }
-          
+
                 // By default, show a loading spinner.
                 return const CircularProgressIndicator();
               },
             ),
-            
           ),
         ),
       ),

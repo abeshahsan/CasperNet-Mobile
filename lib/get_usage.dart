@@ -1,7 +1,8 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
+import 'package:http/http.dart' as http;
 
 Future<String> getCISession() async {
   try {
@@ -36,7 +37,7 @@ Future<String> getCISession() async {
   }
 }
 
-Future<Album> loginIusers() async {
+Future<UsageData> loginIusers() async {
   try {
     final ciSession = await getCISession();
     final response = await http.post(
@@ -58,19 +59,11 @@ Future<Album> loginIusers() async {
           'password': '[AbeshAhsan]',
         });
 
-    Map<String, dynamic> json = {};
-
-    json['userId'] = 1;
-    json['id'] = 1;
-    json['title'] = 'worked so far';
-
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
 
       String htmlContent = response.body;
-
-      json['title'] = response.body;
 
       var document = html.parse(htmlContent);
 
@@ -81,7 +74,6 @@ Future<Album> loginIusers() async {
         if (cells.isNotEmpty) {
           {
             String entry = cells[0].text.toLowerCase().split(":")[0];
-            print(entry);
             if (entry == 'username' ||
                 entry == 'group' ||
                 entry == 'free limit') {
@@ -96,45 +88,45 @@ Future<Album> loginIusers() async {
         }
       }
 
-      json['title'] = dataList.join(', ');
-      //   json['title'] = data[0];
-
-      return Album.fromJson(json);
+      return UsageData.fromArray(dataList);
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
       throw Exception('Failed to load album');
     }
   } catch (e) {
-    print('Error: $e');
     throw Exception('Failed to load album');
   }
 }
 
-class Album {
-  final int userId;
-  final int id;
-  final String title;
+class UsageData {
+  String fullName;
+  String id;
+  int usedMins;
+  int billAmount;
+  static final int totalMins = 13200;
+  int exceededMins;
 
-  const Album({
-    required this.userId,
+  UsageData({
+    required this.fullName,
     required this.id,
-    required this.title,
+    required this.usedMins,
+    required this.billAmount,
+    required this.exceededMins,
   });
 
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'userId': int userId,
-        'id': int id,
-        'title': String title,
-      } =>
-        Album(
-          userId: userId,
-          id: id,
-          title: title,
-        ),
-      _ => throw const FormatException('Failed to load album.'),
-    };
+  factory UsageData.fromArray(List<String> data) {
+    return UsageData(
+      fullName: data[0],
+      id: data[1],
+      usedMins: int.tryParse(data[2]) ?? 0,
+      exceededMins: int.tryParse(data[3]) ?? 0,
+      billAmount: int.tryParse(data[4]) ?? 0,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Name: $fullName\nID: $id\nUsed Minutes: $usedMins\nBill Amount: $exceededMins\nExceeded Minutes: $billAmount';
   }
 }
