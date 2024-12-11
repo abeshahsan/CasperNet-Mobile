@@ -11,6 +11,7 @@
 migrate_working_dir/
 
 adb_connect
+accounts.dart
 
 # IntelliJ related
 *.iml
