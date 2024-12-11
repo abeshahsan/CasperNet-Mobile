@@ -1,4 +1,5 @@
 // import 'package:caspernet/get_usage.dart';
+import 'package:caspernet/usage_data.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/get_usage.dart';
 
@@ -15,10 +16,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late List<Future<UsageData>> usageDataAll;
+  List<List> accounts = getAccounts();
 
   @override
   void initState() {
     super.initState();
+    usageDataAll = accounts
+        .map((account) => getUsageData(account[0], account[1]))
+        .toList();
   }
 
   Widget _buildLoadingIndicator() {
@@ -29,24 +34,21 @@ class _MyAppState extends State<MyApp> {
 
   Widget _buildUsageData(List<UsageData> usageDataList) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: usageDataList.map((data) => Text(data.toString())).toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<List> accounts = getAccounts();
-    usageDataAll =
-        accounts.map((account) => loginIusers(account[0], account[1])).toList();
-
     return MaterialApp(
-      title: 'Internet Usage',
+      title: 'CasprNet',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Fetch Data Example'),
+          title: const Text('Internet Usage'),
         ),
         body: FutureBuilder<List<UsageData>>(
           future: Future.wait(usageDataAll),
@@ -65,6 +67,16 @@ class _MyAppState extends State<MyApp> {
               return const Center(child: Text('No data available'));
             }
           },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              usageDataAll = accounts
+                  .map((account) => getUsageData(account[0], account[1]))
+                  .toList();
+            });
+          },
+          child: const Icon(Icons.refresh),
         ),
       ),
     );
