@@ -37,7 +37,7 @@ Future<String> getCISession() async {
   }
 }
 
-Future<UsageData> loginIusers() async {
+Future<UsageData> loginIusers(String username, String password) async {
   try {
     final ciSession = await getCISession();
     final response = await http.post(
@@ -55,8 +55,8 @@ Future<UsageData> loginIusers() async {
           "Cookie": ciSession,
         },
         body: <String, String>{
-          'username': 'abeshahsan',
-          'password': '[AbeshAhsan]',
+          'username': username,
+          'password': password,
         });
 
     if (response.statusCode == 200) {
@@ -97,6 +97,15 @@ Future<UsageData> loginIusers() async {
   } catch (e) {
     throw Exception('Failed to load album');
   }
+}
+
+List<dynamic> getUsageData() {
+  return [
+    ['Abesh Ahsan', 'abeshahsan', 0, 0, 0],
+    ['Rahiduzzaman', 'rahiduzzaman', 0, 0, 0],
+    ['Rezwan Islam', 'rezwanislam', 0, 0, 0],
+    ['Amit20', 'amit20', 0, 0, 0],
+  ];
 }
 
 class UsageData {

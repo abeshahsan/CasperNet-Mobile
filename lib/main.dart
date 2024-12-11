@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:caspernet/get_usage.dart';
 
+import 'accounts.dart';
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
@@ -12,16 +14,31 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<UsageData> futureAlbum;
+  late List<Future<UsageData>> usageDataAll;
 
   @override
   void initState() {
     super.initState();
   }
 
+  Widget _buildLoadingIndicator() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildUsageData(List<UsageData> usageDataList) {
+    return Column(
+      children: usageDataList.map((data) => Text(data.toString())).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    futureAlbum = loginIusers();
+    List<List> accounts = getAccounts();
+    usageDataAll =
+        accounts.map((account) => loginIusers(account[0], account[1])).toList();
+
     return MaterialApp(
       title: 'Internet Usage',
       theme: ThemeData(
@@ -31,22 +48,23 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Fetch Data Example'),
         ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: FutureBuilder<UsageData>(
-              future: futureAlbum,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Text(snapshot.data!.toString());
-                } else if (snapshot.hasError) {
-                  return Text('${snapshot.error}');
-                }
-
-                // By default, show a loading spinner.
-                return const CircularProgressIndicator();
-              },
-            ),
-          ),
+        body: FutureBuilder<List<UsageData>>(
+          future: Future.wait(usageDataAll),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildLoadingIndicator();
+            } else if (snapshot.hasError) {
+              return Center(child: Text('${snapshot.error}'));
+            } else if (snapshot.hasData) {
+              return SingleChildScrollView(
+                child: Center(
+                  child: _buildUsageData(snapshot.data!),
+                ),
+              );
+            } else {
+              return const Center(child: Text('No data available'));
+            }
+          },
         ),
       ),
     );
