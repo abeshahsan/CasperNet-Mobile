@@ -1,8 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'package:change_case/change_case.dart';
-import 'package:caspernet/usage_data.dart';
-import 'package:flutter/material.dart';
+import 'package:caspernet/iusers/usage_data.dart';
 import 'package:html/parser.dart' as html;
 import 'package:http/http.dart' as http;
 
@@ -61,9 +60,7 @@ Future<UsageData> getUsageData(String username, String password) async {
           {
             String key = cells[0].text.toCamelCase().split(":")[0];
             var value = cells[1].text;
-            if (key == 'group' || key == 'freeLimit') {
-              continue;
-            } else if (key == 'totalUse' ||
+            if (key == 'totalUse' ||
                 key == 'estimatedBill' ||
                 key == 'extraUse') {
               value = value.split(' ')[0];
