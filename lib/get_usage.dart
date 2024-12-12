@@ -1,7 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
-
+import 'package:change_case/change_case.dart';
 import 'package:caspernet/usage_data.dart';
+import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html;
 import 'package:http/http.dart' as http;
 
@@ -53,38 +54,37 @@ Future<UsageData> getUsageData(String username, String password) async {
       var document = html.parse(htmlContent);
 
       var rows = document.querySelectorAll('table')[0].querySelectorAll('tr');
-      List<String> dataList = [];
+      Map<String, String> dataMap = {};
       for (var row in rows) {
         var cells = row.querySelectorAll('td');
         if (cells.isNotEmpty) {
           {
-            String entry = cells[0].text.toLowerCase().split(":")[0];
-            if (entry == 'username' ||
-                entry == 'group' ||
-                entry == 'free limit') {
+            String key = cells[0].text.toCamelCase().split(":")[0];
+            var value = cells[1].text;
+            if (key == 'group' || key == 'freeLimit') {
               continue;
-            } else if (entry == 'total use' ||
-                entry == 'estimated bill' ||
-                entry == 'extra use') {
-              cells[1].text = cells[1].text.split(' ')[0];
+            } else if (key == 'totalUse' ||
+                key == 'estimatedBill' ||
+                key == 'extraUse') {
+              value = value.split(' ')[0];
             }
+            dataMap[key] = value;
           }
-          dataList.add(cells[1].text);
         }
       }
 
-      return UsageData.fromArray(dataList);
+      return UsageData.fromMap(dataMap);
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
-      throw Exception('Failed to load album');
+      throw Exception('Failed to get usage data: ${loginResponse.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load album');
+    throw Exception('Failed to get usage data: $e');
   }
 }
 
-Future<dynamic> loginIusers(String username, String password,
+Future<http.Response> loginIusers(String username, String password,
     [ciSession]) async {
   try {
     final response = await http.post(

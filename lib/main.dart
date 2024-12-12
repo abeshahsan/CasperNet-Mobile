@@ -1,5 +1,6 @@
 // import 'package:caspernet/get_usage.dart';
 import 'package:caspernet/usage_data.dart';
+import 'package:caspernet/usage_table.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/get_usage.dart';
 
@@ -33,10 +34,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildUsageData(List<UsageData> usageDataList) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: usageDataList.map((data) => Text(data.toString())).toList(),
-    );
+    return UsageTable(usageDataList);
   }
 
   @override
@@ -59,8 +57,11 @@ class _MyAppState extends State<MyApp> {
               return Center(child: Text('${snapshot.error}'));
             } else if (snapshot.hasData) {
               return SingleChildScrollView(
-                child: Center(
-                  child: _buildUsageData(snapshot.data!),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0), // Add padding here
+                  child: Center(
+                    child: _buildUsageData(snapshot.data!),
+                  ),
                 ),
               );
             } else {
