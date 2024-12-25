@@ -1,11 +1,10 @@
 // import 'package:caspernet/get_usage.dart';
+import 'package:caspernet/internet_usage_page.dart';
 import 'package:caspernet/iusers/usage_data.dart';
-import 'package:caspernet/iusers/usage_table.dart';
-import 'package:caspernet/xiaomi_router/get_data.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/iusers/get_usage.dart';
 
-import 'iusers/accounts.dart';
+import 'accounts.dart';
 
 void main() => runApp(const MyApp());
 
@@ -20,6 +19,8 @@ class _MyAppState extends State<MyApp> {
   late List<Future<UsageData>> usageDataAll;
   List<List> accounts = getAccounts();
 
+  String route = 'users';
+
   @override
   void initState() {
     super.initState();
@@ -28,60 +29,32 @@ class _MyAppState extends State<MyApp> {
         .toList();
   }
 
-  Widget _buildLoadingIndicator() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-
-  Widget _buildUsageData(List<UsageData> usageDataList) {
-    return UsageTable(usageDataList);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CasprNet',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Internet Usage'),
+        title: 'CasprNet',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        body: FutureBuilder<List<UsageData>>(
-          future: Future.wait(usageDataAll),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildLoadingIndicator();
-            } else if (snapshot.hasError) {
-              return Center(child: Text('${snapshot.error}'));
-            } else if (snapshot.hasData) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0), // Add padding here
-                  child: Center(
-                    child: _buildUsageData(snapshot.data!),
-                  ),
-                ),
-              );
-            } else {
-              return const Center(child: Text('No data available'));
-            }
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              getToken();
-              usageDataAll = accounts
-                  .map((account) => getUsageData(account[0], account[1]))
-                  .toList();
-            });
-          },
-          child: const Icon(Icons.refresh),
-        ),
-      ),
-    );
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Internet Usage'),
+          ),
+          body: Builder(
+            builder: (BuildContext builderContext) {
+              return getUsagePage(builderContext, usageDataAll, accounts);
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                usageDataAll = accounts
+                    .map((account) => getUsageData(account[0], account[1]))
+                    .toList();
+              });
+            },
+            child: const Icon(Icons.refresh),
+          ),
+        ));
   }
 }
