@@ -43,7 +43,7 @@ class _UsersRouteState extends State<UsersRoute> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: const CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(child: Text('An error occurred.'));
             } else {
               return Center(
                 child: Column(
@@ -59,7 +59,7 @@ class _UsersRouteState extends State<UsersRoute> {
                           selectUserOn = !selectUserOn;
                         });
                       },
-                      child: const Text('Select User'),
+                      child: const Text('Change User'),
                     ),
                     const SizedBox(height: 20),
                   ],
@@ -69,12 +69,6 @@ class _UsersRouteState extends State<UsersRoute> {
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(
-      child: CircularProgressIndicator(),
     );
   }
 
@@ -135,8 +129,10 @@ class _UsersRouteState extends State<UsersRoute> {
         return GestureDetector(
           onTap: () {
             setState(() {
-              currentUser = Future.value(account[0]);
-              selectUserOn = false;
+              changeCurrentUser(token, account).then((value) {
+                currentUser = Future.value(account[0]);
+                selectUserOn = false;
+              });
             });
           },
           child: Card(
