@@ -38,6 +38,8 @@ dependencies:
   http: ^1.2.2
   html: ^0.15.5
   change_case: ^2.1.0
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.3.4
 
 dev_dependencies:
   flutter_test:

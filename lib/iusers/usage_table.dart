@@ -18,7 +18,9 @@ class UsageTable extends StatelessWidget {
       },
       children: [
         TableRow(
-          decoration: BoxDecoration(color: Colors.grey[300]),
+          // take a color according to the theme
+          decoration:
+              BoxDecoration(color: Theme.of(context).colorScheme.secondary),
           children: [
             _buildTableHeader('Username'),
             _buildTableHeader('Used\n(Min)'),
