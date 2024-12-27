@@ -8,8 +8,7 @@ class Mytheme {
         // Define the default brightness and colors.
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
-          brightness:
-              Brightness.light, 
+          brightness: Brightness.light,
         ),
         textTheme: TextTheme(
           displayLarge: const TextStyle(

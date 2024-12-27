@@ -74,6 +74,7 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Internet Usage'),
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           actions: [
             IconButton(
               onPressed: () {
@@ -84,7 +85,11 @@ class _MyAppState extends State<MyApp> {
                 });
                 _saveThemeMode(themeMode);
               },
-              icon: const Icon(Icons.brightness_4),
+              icon: Icon(
+                themeMode == ThemeMode.light
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
             ),
           ],
         ),

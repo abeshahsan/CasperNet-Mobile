@@ -19,8 +19,7 @@ class UsageTable extends StatelessWidget {
       children: [
         TableRow(
           // take a color according to the theme
-          decoration:
-              BoxDecoration(color: Theme.of(context).colorScheme.secondary),
+          //   decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondary),
           children: [
             _buildTableHeader('Username'),
             _buildTableHeader('Used\n(Min)'),
@@ -47,7 +46,8 @@ class UsageTable extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          // some google font
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
     );
@@ -59,7 +59,10 @@ class UsageTable extends StatelessWidget {
       child: Center(
         child: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(text),
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 16),
+          ),
         ),
       ),
     );
