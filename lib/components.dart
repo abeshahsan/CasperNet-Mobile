@@ -1,5 +1,4 @@
 import 'package:caspernet/app_global.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
