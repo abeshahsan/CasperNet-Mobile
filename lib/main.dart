@@ -1,12 +1,25 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:caspernet/app_global.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
+import 'package:caspernet/themeconfig.dart';
 import 'package:caspernet/internet_usage_page.dart';
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/get_usage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'accounts.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear any previously saved SharedPreferences
+    AppGlobal.themeManager = ThemeModeManager(prefs);
+  } catch (e) {
+    // Handle the error here, e.g., log it or show a message to the user
+    print('Error initializing SharedPreferences: $e');
+  }
+  runApp(const MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -18,97 +31,54 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late List<Future<UsageData>> usageDataAll;
   List<List> accounts = getAccounts();
-  ThemeMode themeMode = ThemeMode.system;
 
   @override
   void initState() {
     super.initState();
-    _loadThemeMode();
     usageDataAll = accounts
         .map((account) => getUsageData(account[0], account[1]))
         .toList();
   }
 
-  Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final theme = prefs.getString('themeMode') ?? 'system';
-    setState(() {
-      themeMode = _themeFromString(theme);
-    });
-  }
-
-  Future<void> _saveThemeMode(ThemeMode mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('themeMode', _themeToString(mode));
-  }
-
-  String _themeToString(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return 'light';
-      case ThemeMode.dark:
-        return 'dark';
-      default:
-        return 'system';
-    }
-  }
-
-  ThemeMode _themeFromString(String mode) {
-    switch (mode) {
-      case 'light':
-        return ThemeMode.light;
-      case 'dark':
-        return ThemeMode.dark;
-      default:
-        return ThemeMode.system;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CasprNet',
-      theme: Mytheme.lightTheme(context),
-      darkTheme: Mytheme.darkTheme(context),
-      themeMode: themeMode,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Internet Usage'),
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          actions: [
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  themeMode = themeMode == ThemeMode.light
-                      ? ThemeMode.dark
-                      : ThemeMode.light;
-                });
-                _saveThemeMode(themeMode);
-              },
-              icon: Icon(
-                themeMode == ThemeMode.light
-                    ? Icons.light_mode
-                    : Icons.dark_mode,
+    return ValueListenableBuilder(
+        valueListenable: AppGlobal.themeManager.themeMode,
+        builder: (context, ThemeMode themeMode, child) {
+          return MaterialApp(
+            title: 'Internet Usage',
+            theme: Mytheme.lightTheme(context),
+            darkTheme: Mytheme.darkTheme(context),
+            themeMode: themeMode,
+            navigatorKey: AppGlobal.navigatorKey,
+            home: Scaffold(
+              appBar: MyAppBar(
+                title: 'Internet Usage',
+              ),
+              body: Column(
+                children: [
+                  Expanded(
+                    child: Builder(
+                      builder: (BuildContext builderContext) {
+                        return getUsagePage(
+                            builderContext, usageDataAll, accounts);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    usageDataAll = accounts
+                        .map((account) => getUsageData(account[0], account[1]))
+                        .toList();
+                  });
+                },
+                child: const Icon(Icons.refresh),
               ),
             ),
-          ],
-        ),
-        body: Builder(
-          builder: (BuildContext builderContext) {
-            return getUsagePage(builderContext, usageDataAll, accounts);
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              usageDataAll = accounts
-                  .map((account) => getUsageData(account[0], account[1]))
-                  .toList();
-            });
-          },
-          child: const Icon(Icons.refresh),
-        ),
-      ),
-    );
+          );
+        });
   }
 }

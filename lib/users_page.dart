@@ -1,3 +1,4 @@
+import 'package:caspernet/components.dart';
 import 'package:caspernet/xiaomi_router/get_data.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/accounts.dart';
@@ -13,6 +14,7 @@ class _UsersRouteState extends State<UsersRoute> {
   late Future<String> currentUser;
   String token = "";
   bool selectUserOn = false;
+  ThemeMode themeMode = ThemeMode.system;
 
   @override
   void initState() {
@@ -27,8 +29,8 @@ class _UsersRouteState extends State<UsersRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Users List'),
+      appBar: MyAppBar(
+        title: 'Users',
       ),
       body: PopScope(
         canPop: !selectUserOn,
@@ -93,7 +95,8 @@ class _UsersRouteState extends State<UsersRoute> {
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 18,
-                color: isSelected ? Colors.blue : Colors.black,
+                color:
+                    isSelected ? Theme.of(context).colorScheme.primary : null,
               ),
             ),
             subtitle: isSelected
@@ -103,8 +106,9 @@ class _UsersRouteState extends State<UsersRoute> {
                   )
                 : null,
             leading: CircleAvatar(
-              backgroundColor:
-                  isSelected ? Colors.blue.shade100 : Colors.grey.shade200,
+              backgroundColor: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.secondary,
               child: const Icon(Icons.account_circle, color: Colors.blue),
             ),
             trailing: isSelected

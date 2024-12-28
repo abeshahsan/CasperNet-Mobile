@@ -1,49 +1,45 @@
+import 'package:caspernet/app_global.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-class Mytheme {
-  static ThemeData lightTheme(BuildContext context) => ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        // Define the default brightness and colors.
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        textTheme: TextTheme(
-          displayLarge: const TextStyle(
-            fontSize: 72,
-            fontWeight: FontWeight.bold,
-          ),
-          titleLarge: GoogleFonts.oswald(
-            fontSize: 30,
-            fontStyle: FontStyle.normal,
-          ),
-          bodyMedium: GoogleFonts.merriweather(),
-          displaySmall: GoogleFonts.pacifico(),
-        ),
-      );
+class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final String title;
 
-  static ThemeData darkTheme(BuildContext context) {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
-        brightness: Brightness.dark,
-      ),
-      textTheme: TextTheme(
-        displayLarge: const TextStyle(
-          fontSize: 72,
-          fontWeight: FontWeight.bold,
+  const MyAppBar({
+    required this.title,
+    super.key,
+  });
+
+  @override
+  MyAppBarState createState() => MyAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class MyAppBarState extends State<MyAppBar> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Text(widget.title),
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      actions: [
+        IconButton(
+          onPressed: () {
+            AppGlobal.themeManager.toggleTheme();
+          },
+          icon: Icon(
+            Theme.of(context).brightness == Brightness.light
+                ? Icons.dark_mode
+                : Icons.light_mode,
+          ),
         ),
-        titleLarge: GoogleFonts.oswald(
-          fontSize: 30,
-          fontStyle: FontStyle.normal,
-        ),
-        bodyMedium: GoogleFonts.merriweather(),
-        displaySmall: GoogleFonts.pacifico(),
-      ),
+      ],
     );
   }
 }
