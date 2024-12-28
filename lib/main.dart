@@ -1,8 +1,8 @@
 import 'package:caspernet/app_global.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
-import 'package:caspernet/themeconfig.dart';
-import 'package:caspernet/internet_usage_page.dart';
+import 'package:caspernet/theme_config.dart';
+import 'package:caspernet/pages/internet_usage_page.dart';
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/get_usage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,14 +10,9 @@ import 'accounts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Clear any previously saved SharedPreferences
-    AppGlobal.themeManager = ThemeModeManager(prefs);
-  } catch (e) {
-    // Handle the error here, e.g., log it or show a message to the user
-    print('Error initializing SharedPreferences: $e');
-  }
+  final prefs = await SharedPreferences.getInstance();
+  AppGlobal.themeManager = ThemeModeManager(prefs);
+  
   runApp(const MyApp());
 }
 
@@ -47,8 +42,8 @@ class _MyAppState extends State<MyApp> {
         builder: (context, ThemeMode themeMode, child) {
           return MaterialApp(
             title: 'Internet Usage',
-            theme: Mytheme.lightTheme(context),
-            darkTheme: Mytheme.darkTheme(context),
+            theme: ThemeConfig.lightTheme(context),
+            darkTheme: ThemeConfig.darkTheme(context),
             themeMode: themeMode,
             navigatorKey: AppGlobal.navigatorKey,
             home: Scaffold(

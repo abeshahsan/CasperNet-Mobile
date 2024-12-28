@@ -1,4 +1,4 @@
-import 'package:caspernet/themeconfig.dart';
+import 'package:caspernet/theme_config.dart';
 import 'package:flutter/material.dart';
 
 class AppGlobal {

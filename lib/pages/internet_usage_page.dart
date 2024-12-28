@@ -1,6 +1,6 @@
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/usage_table.dart';
-import 'package:caspernet/users_page.dart';
+import 'package:caspernet/pages/users_page.dart';
 import 'package:flutter/material.dart';
 
 Widget _buildLoadingIndicator() {
