@@ -7,7 +7,7 @@ class UsageData {
   String studentId;
   int totalUse;
   int estimatedBill;
-  static final int freeLimit = 13200;
+  static const int freeLimit = 13200;
   int extraUse;
 
   UsageData({

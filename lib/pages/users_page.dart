@@ -1,7 +1,8 @@
 import 'package:caspernet/components.dart';
-import 'package:caspernet/xiaomi_router/get_data.dart';
+import 'package:caspernet/providers/xiaomi_router_settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/accounts.dart';
+import 'package:provider/provider.dart';
 
 class UsersRoute extends StatefulWidget {
   const UsersRoute({super.key});
@@ -11,65 +12,70 @@ class UsersRoute extends StatefulWidget {
 }
 
 class _UsersRouteState extends State<UsersRoute> {
-  late Future<String> currentUser;
-  String token = "";
-  bool selectUserOn = false;
-  ThemeMode themeMode = ThemeMode.system;
-
-  @override
-  void initState() {
-    super.initState();
-    currentUser = Future.value("");
-    getToken().then((value) => setState(() {
-          token = value;
-          currentUser = getCurrentUSer(token);
-        }));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
+      appBar: const MyAppBar(
         title: 'Users',
       ),
-      body: PopScope(
-        canPop: !selectUserOn,
-        onPopInvokedWithResult: (didPop, result) => {
-          setState(() {
-            selectUserOn = false;
-          })
-        },
-        child: FutureBuilder<String>(
-          future: currentUser,
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: const CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('An error occurred.'));
-            } else {
-              return Center(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: selectUserOn
-                          ? _buildSelectUserList(snapshot)
-                          : _buildUsersList(snapshot),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          selectUserOn = !selectUserOn;
-                        });
-                      },
-                      child: const Text('Change User'),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              );
-            }
-          },
-        ),
+      body: Consumer<XiaomiRouterSettingsProvider>(
+          builder: (routerContext, rsProvider, _) {
+        return PopScope(
+          canPop: !rsProvider.selectUserOn,
+          onPopInvokedWithResult: (didPop, result) =>
+              rsProvider.selectUserOn = false,
+          child: FutureBuilder<String>(
+            future: rsProvider.currentUser,
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  rsProvider.currentUser == Future.value("")) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return snapshotErrorWidget();
+              } else {
+                return Center(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: rsProvider.selectUserOn
+                            ? _buildSelectUserList(snapshot)
+                            : _buildUsersList(snapshot),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          rsProvider.selectUserOn = true;
+                        },
+                        child: const Text('Change User'),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget snapshotErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'An error occurred.',
+            style: TextStyle(color: Colors.red, fontSize: 18),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {});
+            },
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
@@ -132,19 +138,14 @@ class _UsersRouteState extends State<UsersRoute> {
 
         return GestureDetector(
           onTap: () {
-            setState(() {
-              changeCurrentUser(token, account).then((value) {
-                currentUser = Future.value(account[0]);
-                selectUserOn = false;
-              });
-            });
+            context.read<XiaomiRouterSettingsProvider>().changeUser(account);
           },
           child: Card(
             elevation: 3.0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
               side: isSelected
-                  ? BorderSide(color: Colors.blue, width: 2.0)
+                  ? const BorderSide(color: Colors.blue, width: 2.0)
                   : BorderSide.none,
             ),
             child: ListTile(
