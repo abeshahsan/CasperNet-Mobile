@@ -1,42 +1,25 @@
 import 'package:caspernet/app_global.dart';
-import 'package:caspernet/themeconfig.dart';
+import 'package:caspernet/providers/internet_usage_provider.dart';
+import 'package:caspernet/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/theme_config.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
-import 'package:caspernet/iusers/usage_data.dart';
-import 'package:caspernet/iusers/get_usage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'accounts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => ThemeModeProvider(prefs))
+    ChangeNotifierProvider(create: (_) => ThemeModeProvider(prefs)),
+    ChangeNotifierProvider(create: (_) => InternetUsageProvider()),
   ], child: const MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late List<Future<UsageData>> usageDataAll;
-  List<List> accounts = getAccounts();
-
-  @override
-  void initState() {
-    super.initState();
-    usageDataAll = accounts
-        .map((account) => getUsageData(account[0], account[1]))
-        .toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,26 +34,20 @@ class _MyAppState extends State<MyApp> {
           appBar: MyAppBar(
             title: 'Internet Usage',
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: Builder(
-                  builder: (BuildContext builderContext) {
-                    return getUsagePage(builderContext, usageDataAll, accounts);
+          body: InternetUsagePage(),
+          floatingActionButton: Consumer<InternetUsageProvider>(
+            builder: (context, internetUsageProvider, _) =>
+                Positioned(
+                  bottom: 40,
+                  right: 40,
+                  child: FloatingActionButton(
+                  shape: CircleBorder(),
+                  onPressed: () {
+                    internetUsageProvider.refreshData();
                   },
+                  child: const Icon(Icons.refresh),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                usageDataAll = accounts
-                    .map((account) => getUsageData(account[0], account[1]))
-                    .toList();
-              });
-            },
-            child: const Icon(Icons.refresh),
           ),
         ),
       );
