@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class XiaomiRouterSettingsProvider with ChangeNotifier {
   Future<String> _currentUser = Future.value("");
   String token = "";
-  bool _selectUserOn = false;
 
   XiaomiRouterSettingsProvider() {
     getToken().then((value) {
@@ -20,18 +19,16 @@ class XiaomiRouterSettingsProvider with ChangeNotifier {
   }
 
   Future<String> get currentUser => _currentUser;
-  bool get selectUserOn => _selectUserOn;
-  set selectUserOn(bool value) {
-    _selectUserOn = value;
-    notifyListeners();
-  }
 
   String get currentToken => token;
 
   Future<void> changeUser(List<dynamic> user) async {
-    await changeCurrentUser(token, user);
-    _currentUser = Future.value(user[0]);
-    selectUserOn = false;
-    notifyListeners();
+    try {
+      await changeCurrentUser(token, user);
+      _currentUser = Future.value(user[0]);
+      notifyListeners();
+    } catch (e) {
+      _currentUser = Future.value("");
+    }
   }
 }

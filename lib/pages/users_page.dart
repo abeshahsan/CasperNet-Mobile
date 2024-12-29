@@ -12,6 +12,8 @@ class UsersRoute extends StatefulWidget {
 }
 
 class _UsersRouteState extends State<UsersRoute> {
+  bool selectUserOn = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,9 +23,8 @@ class _UsersRouteState extends State<UsersRoute> {
       body: Consumer<XiaomiRouterSettingsProvider>(
           builder: (routerContext, rsProvider, _) {
         return PopScope(
-          canPop: !rsProvider.selectUserOn,
-          onPopInvokedWithResult: (didPop, result) =>
-              rsProvider.selectUserOn = false,
+          canPop: !selectUserOn,
+          onPopInvokedWithResult: (didPop, result) => selectUserOn = false,
           child: FutureBuilder<String>(
             future: rsProvider.currentUser,
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -34,16 +35,24 @@ class _UsersRouteState extends State<UsersRoute> {
                 return snapshotErrorWidget();
               } else {
                 return Center(
-                  child: Column(
+                  child: Column( 
                     children: [
                       Expanded(
-                        child: rsProvider.selectUserOn
+                        child: selectUserOn
                             ? _buildSelectUserList(snapshot)
                             : _buildUsersList(snapshot),
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          rsProvider.selectUserOn = true;
+                          if (rsProvider.currentUser == Future.value("")) {
+                            setState(() {
+                              selectUserOn = false;
+                            });
+                            return;
+                          }
+                          setState(() {
+                            selectUserOn = !selectUserOn;
+                          });
                         },
                         child: const Text('Change User'),
                       ),
@@ -105,12 +114,6 @@ class _UsersRouteState extends State<UsersRoute> {
                     isSelected ? Theme.of(context).colorScheme.primary : null,
               ),
             ),
-            subtitle: isSelected
-                ? const Text(
-                    "Current User",
-                    style: TextStyle(color: Colors.blueGrey),
-                  )
-                : null,
             leading: CircleAvatar(
               backgroundColor: isSelected
                   ? Theme.of(context).colorScheme.primary
@@ -138,6 +141,7 @@ class _UsersRouteState extends State<UsersRoute> {
 
         return GestureDetector(
           onTap: () {
+            selectUserOn = false;
             context.read<XiaomiRouterSettingsProvider>().changeUser(account);
           },
           child: Card(
