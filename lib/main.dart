@@ -1,19 +1,22 @@
 import 'package:caspernet/app_global.dart';
+import 'package:caspernet/themeconfig.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/theme_config.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/get_usage.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'accounts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  AppGlobal.themeManager = ThemeModeManager(prefs);
-  
-  runApp(const MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => ThemeModeProvider(prefs))
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -37,43 +40,40 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: AppGlobal.themeManager.themeMode,
-        builder: (context, ThemeMode themeMode, child) {
-          return MaterialApp(
+    return Consumer<ThemeModeProvider>(builder: (themeProviderContext, _, __) {
+      return MaterialApp(
+        title: 'Internet Usage',
+        theme: ThemeConfig.lightTheme(themeProviderContext),
+        darkTheme: ThemeConfig.darkTheme(themeProviderContext),
+        themeMode: themeProviderContext.watch<ThemeModeProvider>().themeMode,
+        navigatorKey: AppGlobal.navigatorKey,
+        home: Scaffold(
+          appBar: MyAppBar(
             title: 'Internet Usage',
-            theme: ThemeConfig.lightTheme(context),
-            darkTheme: ThemeConfig.darkTheme(context),
-            themeMode: themeMode,
-            navigatorKey: AppGlobal.navigatorKey,
-            home: Scaffold(
-              appBar: MyAppBar(
-                title: 'Internet Usage',
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: Builder(
+                  builder: (BuildContext builderContext) {
+                    return getUsagePage(builderContext, usageDataAll, accounts);
+                  },
+                ),
               ),
-              body: Column(
-                children: [
-                  Expanded(
-                    child: Builder(
-                      builder: (BuildContext builderContext) {
-                        return getUsagePage(
-                            builderContext, usageDataAll, accounts);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    usageDataAll = accounts
-                        .map((account) => getUsageData(account[0], account[1]))
-                        .toList();
-                  });
-                },
-                child: const Icon(Icons.refresh),
-              ),
-            ),
-          );
-        });
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                usageDataAll = accounts
+                    .map((account) => getUsageData(account[0], account[1]))
+                    .toList();
+              });
+            },
+            child: const Icon(Icons.refresh),
+          ),
+        ),
+      );
+    });
   }
 }

@@ -21,7 +21,7 @@ class Mytheme {
           elevation: 0,
           centerTitle: true,
         ),
-        
+
         textTheme: _textTheme(Brightness.light),
         elevatedButtonTheme: _elevatedButtonTheme(Brightness.light),
         outlinedButtonTheme: _outlinedButtonTheme(Brightness.light),
@@ -121,20 +121,21 @@ class Mytheme {
       );
 }
 
-class ThemeModeManager {
+class ThemeModeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
-  final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.system);
+  ThemeMode themeMode = ThemeMode.system;
   final SharedPreferences _prefs;
-  ThemeModeManager(this._prefs) {
+
+  ThemeModeProvider(this._prefs) {
     _loadTheme();
   }
 
   void _loadTheme() {
     final savedTheme = _prefs.getString(_themeKey);
     if (savedTheme is! String) {
-      themeMode.value = ThemeMode.system;
+      themeMode = ThemeMode.system;
     } else {
-      themeMode.value = _getThemeMode(savedTheme);
+      themeMode = _getThemeMode(savedTheme);
     }
   }
 
@@ -150,13 +151,13 @@ class ThemeModeManager {
   }
 
   void toggleTheme() {
-    themeMode.value =
-        themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    setTheme(themeMode.value.toString().split('.')[1]);
+    themeMode = themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    _setTheme(themeMode.toString().split('.')[1]);
+    notifyListeners();
   }
 
-  Future<void> setTheme(String theme) async {
+  Future<void> _setTheme(String theme) async {
     await _prefs.setString(_themeKey, theme);
-    themeMode.value = _getThemeMode(theme);
+    themeMode = _getThemeMode(theme);
   }
 }

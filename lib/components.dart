@@ -1,5 +1,6 @@
-import 'package:caspernet/app_global.dart';
+import 'package:caspernet/themeconfig.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -28,16 +29,19 @@ class MyAppBarState extends State<MyAppBar> {
       title: Text(widget.title),
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       actions: [
-        IconButton(
-          onPressed: () {
-            AppGlobal.themeManager.toggleTheme();
-          },
-          icon: Icon(
-            Theme.of(context).brightness == Brightness.light
-                ? Icons.dark_mode
-                : Icons.light_mode,
-          ),
-        ),
+        Consumer<ThemeModeProvider>(
+            builder: (themeContext, ThemeModeProvider themeModeProvider, _) {
+          return IconButton(
+            onPressed: () {
+              themeContext.read<ThemeModeProvider>().toggleTheme();
+            },
+            icon: Icon(
+              Theme.of(themeContext).brightness == Brightness.light
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+            ),
+          );
+        }),
       ],
     );
   }
