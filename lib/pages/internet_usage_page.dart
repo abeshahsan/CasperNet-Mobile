@@ -28,12 +28,12 @@ class InternetUsagePage extends StatelessWidget {
             builder: (context, InternetUsageProvider internetUsageProvider, _) {
               return FutureBuilder<List<UsageData>>(
                 future: Future.wait(internetUsageProvider.usageData)
-                    .timeout(const Duration(seconds: 10)),
+                    .timeout(const Duration(seconds: 30)),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return _buildLoadingIndicator();
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('No data available'));
+                    return Center(child: Text('No data available: ${snapshot.error}'));
                   } else if (snapshot.hasData) {
                     return SingleChildScrollView(
                       child: Padding(
@@ -58,7 +58,7 @@ class InternetUsagePage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   builderContext,
-                  MaterialPageRoute(builder: (context) => UsersRoute()),
+                  MaterialPageRoute(builder: (context) => const UsersRoute()),
                 );
               },
               style: ElevatedButton.styleFrom(

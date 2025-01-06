@@ -7,14 +7,12 @@ import 'package:caspernet/components.dart';
 import 'package:caspernet/theme_config.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
 
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => ThemeModeProvider(prefs)),
+    ChangeNotifierProvider(create: (_) => ThemeModeProvider()),
     ChangeNotifierProvider(create: (_) => InternetUsageProvider()),
     ChangeNotifierProvider(create: (_) => XiaomiRouterSettingsProvider()),
   ], child: const MyApp()));
@@ -25,12 +23,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeModeProvider>(builder: (themeProviderContext, _, __) {
+    return Consumer<ThemeModeProvider>(builder: (themeProviderContext, themeProvider, __) {
       return MaterialApp(
         title: 'Internet Usage',
         theme: ThemeConfig.lightTheme(themeProviderContext),
         darkTheme: ThemeConfig.darkTheme(themeProviderContext),
-        themeMode: themeProviderContext.watch<ThemeModeProvider>().themeMode,
+        themeMode: themeProvider.themeMode,
         navigatorKey: AppGlobal.navigatorKey,
         home: Scaffold(
           appBar: const MyAppBar(

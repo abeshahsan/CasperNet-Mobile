@@ -123,14 +123,11 @@ class Mytheme {
 
 class ThemeModeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
-  ThemeMode themeMode = ThemeMode.light;
-  late SharedPreferences _prefs;
+  ThemeMode themeMode = ThemeMode.system;
+  final SharedPreferences _prefs;
 
-  ThemeModeProvider() {
-    SharedPreferences.getInstance().then((prefs) {
-      _prefs = prefs;
-      _loadTheme();
-    });
+  ThemeModeProvider(this._prefs) {
+    _loadTheme();
   }
 
   void _loadTheme() {
@@ -146,20 +143,16 @@ class ThemeModeProvider extends ChangeNotifier {
     switch (theme) {
       case 'dark':
         return ThemeMode.dark;
-      default:
+      case 'light':
         return ThemeMode.light;
+      default:
+        return ThemeMode.system;
     }
   }
 
   void toggleTheme() {
-    switch (themeMode) {
-      case ThemeMode.light:
-        _setTheme('dark');
-        break;
-      default:
-        _setTheme('light');
-        break;
-    }
+    themeMode = themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    _setTheme(themeMode.toString().split('.')[1]);
     notifyListeners();
   }
 

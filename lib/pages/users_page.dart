@@ -24,7 +24,11 @@ class _UsersRouteState extends State<UsersRoute> {
           builder: (routerContext, rsProvider, _) {
         return PopScope(
           canPop: !selectUserOn,
-          onPopInvokedWithResult: (didPop, result) => selectUserOn = false,
+          onPopInvokedWithResult: (didPop, result) {
+            setState(() {
+              selectUserOn = false;
+            });
+          },
           child: FutureBuilder<String>(
             future: rsProvider.currentUser,
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -32,10 +36,10 @@ class _UsersRouteState extends State<UsersRoute> {
                   rsProvider.currentUser == Future.value("")) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return snapshotErrorWidget();
+                return _snapshotErrorWidget();
               } else {
                 return Center(
-                  child: Column( 
+                  child: Column(
                     children: [
                       Expanded(
                         child: selectUserOn
@@ -68,7 +72,7 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget snapshotErrorWidget() {
+  Widget _snapshotErrorWidget() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
