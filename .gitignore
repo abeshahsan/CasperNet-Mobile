@@ -10,7 +10,7 @@
 .svn/
 migrate_working_dir/
 
-adb_connect
+adb_connect.*
 accounts.dart
 
 # IntelliJ related

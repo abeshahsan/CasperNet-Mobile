@@ -163,8 +163,12 @@ class ThemeModeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _setTheme(String theme) async {
-    await _prefs.setString(_themeKey, theme);
-    themeMode = _getThemeMode(theme);
+  void _setTheme(String theme) {
+    _prefs.setString(_themeKey, theme).then((value) {
+      themeMode = _getThemeMode(theme);
+    }).catchError((error) {
+      print('Error saving theme: $error');
+      themeMode = ThemeMode.light;
+    });
   }
 }
