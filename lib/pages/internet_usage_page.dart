@@ -28,7 +28,7 @@ class InternetUsagePage extends StatelessWidget {
             builder: (context, InternetUsageProvider internetUsageProvider, _) {
               return FutureBuilder<List<UsageData>>(
                 future: Future.wait(internetUsageProvider.usageData)
-                    .timeout(const Duration(seconds: 30)),
+                    .timeout(const Duration(seconds: 10)),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return _buildLoadingIndicator();
