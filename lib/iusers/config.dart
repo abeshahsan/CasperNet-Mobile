@@ -1,5 +1,5 @@
 Uri getLoginUrl() {
-  return Uri.parse('http://192.168.31.28:3000/login');
+  return Uri.parse('http://192.168.31.222:3000/login');
   //   return Uri.parse('http://10.220.20.12/index.php/home/login');
 }
 
