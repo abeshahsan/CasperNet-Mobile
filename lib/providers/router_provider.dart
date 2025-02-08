@@ -1,8 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:caspernet/routers/base_router/base_router.dart';
-// import 'package:caspernet/routers/xiaomi_router/get_data.dart';
 import 'package:caspernet/routers/xiaomi_router/xiaomi_router.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +13,7 @@ class RouterProvider with ChangeNotifier {
   Future<void> _setupRouting() async {
     try {
       await router.login();
-    //   print('Login Success');
+      //   print('Login Success');
       _currentUser = router.getUserInfo();
       notifyListeners();
     } catch (e) {
