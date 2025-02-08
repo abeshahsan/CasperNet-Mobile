@@ -1,7 +1,7 @@
 import 'package:caspernet/app_global.dart';
 import 'package:caspernet/providers/internet_usage_provider.dart';
 import 'package:caspernet/providers/theme_provider.dart';
-import 'package:caspernet/providers/xiaomi_router_settings_provider.dart';
+import 'package:caspernet/providers/router_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/theme_config.dart';
@@ -14,7 +14,7 @@ Future<void> main() async {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => ThemeModeProvider()),
     ChangeNotifierProvider(create: (_) => InternetUsageProvider()),
-    ChangeNotifierProvider(create: (_) => XiaomiRouterSettingsProvider()),
+    ChangeNotifierProvider(create: (_) => RouterProvider()),
   ], child: const MyApp()));
 }
 
@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeModeProvider>(builder: (themeProviderContext, themeProvider, __) {
+    return Consumer<ThemeModeProvider>(
+        builder: (themeProviderContext, themeProvider, __) {
       return MaterialApp(
         title: 'Internet Usage',
         theme: ThemeConfig.lightTheme(themeProviderContext),
@@ -38,12 +39,12 @@ class MyApp extends StatelessWidget {
           floatingActionButton: Consumer<InternetUsageProvider>(
             builder: (context, internetUsageProvider, _) =>
                 FloatingActionButton(
-                shape: const CircleBorder(),
-                onPressed: () {
-                  internetUsageProvider.refreshData();
-                },
-                child: const Icon(Icons.refresh),
-                ),
+              shape: const CircleBorder(),
+              onPressed: () {
+                internetUsageProvider.refreshData();
+              },
+              child: const Icon(Icons.refresh),
+            ),
           ),
         ),
       );

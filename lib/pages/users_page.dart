@@ -1,5 +1,5 @@
 import 'package:caspernet/components.dart';
-import 'package:caspernet/providers/xiaomi_router_settings_provider.dart';
+import 'package:caspernet/providers/router_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/accounts.dart';
 import 'package:provider/provider.dart';
@@ -20,8 +20,7 @@ class _UsersRouteState extends State<UsersRoute> {
       appBar: const MyAppBar(
         title: 'Users',
       ),
-      body: Consumer<XiaomiRouterSettingsProvider>(
-          builder: (routerContext, rsProvider, _) {
+      body: Consumer<RouterProvider>(builder: (routerContext, rsProvider, _) {
         return PopScope(
           canPop: !selectUserOn,
           onPopInvokedWithResult: (didPop, result) {
@@ -146,7 +145,7 @@ class _UsersRouteState extends State<UsersRoute> {
         return GestureDetector(
           onTap: () {
             selectUserOn = false;
-            context.read<XiaomiRouterSettingsProvider>().changeUser(account);
+            context.read<RouterProvider>().changeUser(account);
           },
           child: Card(
             elevation: 3.0,
