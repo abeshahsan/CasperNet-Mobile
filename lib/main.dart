@@ -1,4 +1,5 @@
 import 'package:caspernet/app_global.dart';
+import 'package:caspernet/providers/awesome_notification_provider.dart';
 import 'package:caspernet/providers/internet_usage_provider.dart';
 import 'package:caspernet/providers/theme_provider.dart';
 import 'package:caspernet/providers/router_provider.dart';
@@ -15,6 +16,7 @@ Future<void> main() async {
     ChangeNotifierProvider(create: (_) => ThemeModeProvider()),
     ChangeNotifierProvider(create: (_) => InternetUsageProvider()),
     ChangeNotifierProvider(create: (_) => RouterProvider()),
+    ChangeNotifierProvider(create: (_) => LocalNotificationProvider()),
   ], child: const MyApp()));
 }
 
@@ -36,15 +38,32 @@ class MyApp extends StatelessWidget {
             title: 'Internet Usage',
           ),
           body: const InternetUsagePage(),
-          floatingActionButton: Consumer<InternetUsageProvider>(
-            builder: (context, internetUsageProvider, _) =>
-                FloatingActionButton(
-              shape: const CircleBorder(),
-              onPressed: () {
-                internetUsageProvider.refreshData();
-              },
-              child: const Icon(Icons.refresh),
-            ),
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Consumer<InternetUsageProvider>(
+                builder: (context, internetUsageProvider, _) =>
+                    FloatingActionButton(
+                  shape: const CircleBorder(),
+                  onPressed: () {
+                    internetUsageProvider.refreshData();
+                  },
+                  child: const Icon(Icons.refresh),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Consumer<LocalNotificationProvider>(
+                builder: (context, awesomeNotificationProvider, _) =>
+                    FloatingActionButton(
+                  shape: const CircleBorder(),
+                  onPressed: () {
+                    print('Showing notification');
+                    awesomeNotificationProvider.showNotification();
+                  },
+                  child: const Icon(Icons.notifications),
+                ),
+              ),
+            ],
           ),
         ),
       );

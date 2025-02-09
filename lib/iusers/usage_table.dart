@@ -8,6 +8,9 @@ class UsageTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth * 0.04; // Adjust the multiplier as needed
+
     return Table(
       border: TableBorder.all(color: Colors.grey),
       columnWidths: const {
@@ -18,42 +21,41 @@ class UsageTable extends StatelessWidget {
       },
       children: [
         TableRow(
-          // take a color according to the theme
-          //   decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondary),
           children: [
-            _buildTableHeader('Username'),
-            _buildTableHeader('Used\n(Min)'),
-            _buildTableHeader('Extra\n(Min)'),
-            _buildTableHeader('  Bill\n(BDT)'),
+            _buildTableHeader('Username', fontSize),
+            _buildTableHeader('Used\n(Min)', fontSize),
+            _buildTableHeader('Extra\n(Min)', fontSize),
+            _buildTableHeader('  Bill\n(BDT)', fontSize),
           ],
         ),
         ...dataList.map((data) {
           var dataMap = data.toMap();
           return TableRow(children: [
-            _buildTableCell(dataMap['username'].toString()),
-            _buildTableCell(dataMap['totalUse'].toString()),
-            _buildTableCell(dataMap['extraUse'].toString()),
-            _buildTableCell(dataMap['estimatedBill'].toString()),
+            _buildTableCell(dataMap['username'].toString(), fontSize),
+            _buildTableCell(dataMap['totalUse'].toString(), fontSize),
+            _buildTableCell(dataMap['extraUse'].toString(), fontSize),
+            _buildTableCell(dataMap['estimatedBill'].toString(), fontSize),
           ]);
         }),
       ],
     );
   }
 
-  Widget _buildTableHeader(String text) {
+  Widget _buildTableHeader(String text, double fontSize) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Center(
+      child: Align(
+        alignment: Alignment.center,
         child: Text(
           text,
-          // some google font
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
 
-  Widget _buildTableCell(String text) {
+  Widget _buildTableCell(String text, double fontSize) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
@@ -61,7 +63,7 @@ class UsageTable extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             text,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: fontSize),
           ),
         ),
       ),

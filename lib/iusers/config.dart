@@ -1,6 +1,11 @@
 Uri getLoginUrl() {
-  return Uri.parse('http://192.168.31.222:3000/login');
-  //   return Uri.parse('http://10.220.20.12/index.php/home/login');
+  if (const bool.fromEnvironment('dart.vm.product')) {
+    // production mode
+    return Uri.parse('http://10.220.20.12/index.php/home/login');
+  } else {
+    // debug mode
+    return Uri.parse('http://192.168.31.222:3000/login');
+  }
 }
 
 Uri getLoginProcessUrl() {

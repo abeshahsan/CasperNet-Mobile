@@ -16,6 +16,9 @@ class _UsersRouteState extends State<UsersRoute> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth * 0.04; // Adjust the multiplier as needed
+
     return Scaffold(
       appBar: const MyAppBar(
         title: 'Users',
@@ -42,8 +45,8 @@ class _UsersRouteState extends State<UsersRoute> {
                     children: [
                       Expanded(
                         child: selectUserOn
-                            ? _buildSelectUserList(snapshot)
-                            : _buildUsersList(snapshot),
+                            ? _buildSelectUserList(snapshot, fontSize)
+                            : _buildUsersList(snapshot, fontSize),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -92,7 +95,7 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget _buildUsersList(AsyncSnapshot<String> snapshot) {
+  Widget _buildUsersList(AsyncSnapshot<String> snapshot, double fontSize) {
     final accounts = getAccounts();
 
     return ListView.builder(
@@ -112,7 +115,7 @@ class _UsersRouteState extends State<UsersRoute> {
               account[0],
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 18,
+                fontSize: fontSize,
                 color:
                     isSelected ? Theme.of(context).colorScheme.primary : null,
               ),
@@ -132,7 +135,7 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget _buildSelectUserList(AsyncSnapshot<String> snapshot) {
+  Widget _buildSelectUserList(AsyncSnapshot<String> snapshot, double fontSize) {
     final accounts = getAccounts();
 
     return ListView.builder(
@@ -158,8 +161,8 @@ class _UsersRouteState extends State<UsersRoute> {
             child: ListTile(
               title: Text(
                 account[0],
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: fontSize,
                 ),
               ),
               leading: CircleAvatar(
