@@ -140,6 +140,8 @@ class ThemeModeProvider extends ChangeNotifier {
     } else {
       themeMode = _getThemeMode(savedTheme);
     }
+    print('Theme loaded: $themeMode');
+    notifyListeners();
   }
 
   ThemeMode _getThemeMode(String theme) {
@@ -151,24 +153,26 @@ class ThemeModeProvider extends ChangeNotifier {
     }
   }
 
-  void toggleTheme() {
-    switch (themeMode) {
-      case ThemeMode.light:
-        _setTheme('dark');
-        break;
-      default:
-        _setTheme('light');
-        break;
+  void toggleTheme() async {
+    try {
+      if (themeMode == ThemeMode.light) {
+        await _setTheme('dark');
+      } else {
+        await _setTheme('light');
+      }
+      notifyListeners();
+    } catch (error) {
+      print('Error toggling theme: $error');
     }
-    notifyListeners();
+    print('Theme toggled: $themeMode');
   }
 
-  void _setTheme(String theme) {
-    _prefs.setString(_themeKey, theme).then((value) {
+  Future<void> _setTheme(String theme) async {
+    try {
+      await _prefs.setString(_themeKey, theme);
       themeMode = _getThemeMode(theme);
-    }).catchError((error) {
-      print('Error saving theme: $error');
-      themeMode = ThemeMode.light;
-    });
+    } catch (error) {
+      throw Exception('Error setting theme: $error');
+    }
   }
 }
