@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+part of 'theme_bloc.dart';
 
 class ThemeConfig {
   // Define a consistent seed color
   static const MaterialColor _seedColor = Colors.blue;
 
   // Light Theme
-  static ThemeData lightTheme(BuildContext context) => ThemeData(
+  static ThemeData lightTheme() => ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
@@ -21,6 +19,7 @@ class ThemeConfig {
           elevation: 0,
           centerTitle: true,
         ),
+
         textTheme: _textTheme(Brightness.light),
         elevatedButtonTheme: _elevatedButtonTheme(Brightness.light),
         outlinedButtonTheme: _outlinedButtonTheme(Brightness.light),
@@ -34,7 +33,7 @@ class ThemeConfig {
       );
 
   // Dark Theme
-  static ThemeData darkTheme(BuildContext context) => ThemeData(
+  static ThemeData darkTheme() => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
@@ -118,44 +117,4 @@ class ThemeConfig {
           ),
         ),
       );
-}
-
-class ThemeModeManager {
-  static const String _themeKey = 'theme_mode';
-  final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.system);
-  final SharedPreferences _prefs;
-  ThemeModeManager(this._prefs) {
-    _loadTheme();
-  }
-
-  void _loadTheme() {
-    final savedTheme = _prefs.getString(_themeKey);
-    if (savedTheme is! String) {
-      themeMode.value = ThemeMode.system;
-    } else {
-      themeMode.value = _getThemeMode(savedTheme);
-    }
-  }
-
-  ThemeMode _getThemeMode(String theme) {
-    switch (theme) {
-      case 'dark':
-        return ThemeMode.dark;
-      case 'light':
-        return ThemeMode.light;
-      default:
-        return ThemeMode.system;
-    }
-  }
-
-  void toggleTheme() {
-    themeMode.value =
-        themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    setTheme(themeMode.value.toString().split('.')[1]);
-  }
-
-  Future<void> setTheme(String theme) async {
-    await _prefs.setString(_themeKey, theme);
-    themeMode.value = _getThemeMode(theme);
-  }
 }

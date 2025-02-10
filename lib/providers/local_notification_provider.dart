@@ -1,6 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationProvider with ChangeNotifier {
@@ -11,6 +13,7 @@ class LocalNotificationProvider with ChangeNotifier {
 
   LocalNotificationProvider() {
     initialize();
+    print('Local notification provider initialized');
   }
 
   //INITIALIZE LOCAL NOTIFICATION PLUGIN
@@ -36,14 +39,23 @@ class LocalNotificationProvider with ChangeNotifier {
       await localNotifPlugin.initialize(initializationSettings);
 
       _isInitialized = true;
+
       notifyListeners();
     }
   }
 
   Future<bool> _requestAndroidPermissions() async {
-    if (Platform.isAndroid && int.parse(Platform.operatingSystemVersion.split(' ')[0]) >= 33) {
-      final status = await Permission.notification.request();
-      return status.isGranted;
+    if (Platform.isAndroid) {
+      try {
+        final version =
+            int.parse(Platform.operatingSystemVersion.split(' ')[0]);
+        if (version >= 33) {
+          final status = await Permission.notification.request();
+          return status.isGranted;
+        }
+      } catch (e) {
+        print('Error parsing Android version: $e');
+      }
     }
     return true;
   }
@@ -76,8 +88,33 @@ class LocalNotificationProvider with ChangeNotifier {
       notificationDetails(),
       payload: 'item x',
     );
-    notifyListeners();
-    print('Notification shown');
+    // notifyListeners();
+    // print('Notification shown');
+  }
+
+  //SET CONDITIONS AND INTERVAL FOR NOTIFICATIONS
+  Future<void> scheduleNotification(int intervalInMinutes) async {
+    print(
+        'scheduleNotification called with interval: $intervalInMinutes minutes');
+    try {
+      if (!_isInitialized) {
+        await initialize();
+      }
+
+      final details = notificationDetails();
+      await localNotifPlugin.periodicallyShow(
+        0,
+        'Scheduled Notification',
+        'This is a scheduled notification',
+        RepeatInterval.everyMinute,
+        details,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+      );
+    //   notifyListeners();
+      print('Scheduled notification set for every $intervalInMinutes minutes');
+    } catch (e) {
+      print('Error scheduling notification: $e');
+    }
   }
 
   //ON NOTIFICATION CLICK

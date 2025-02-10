@@ -1,6 +1,7 @@
-import 'package:caspernet/providers/theme_provider.dart';
+import 'package:caspernet/bloc/theme/theme_bloc.dart';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -25,23 +26,21 @@ class MyAppBarState extends State<MyAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeBloc themeBloc = BlocProvider.of<ThemeBloc>(context);
     return AppBar(
       title: Text(widget.title),
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      //   backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       actions: [
-        Consumer<ThemeModeProvider>(
-            builder: (themeContext, ThemeModeProvider themeModeProvider, _) {
-          return IconButton(
-            onPressed: () {
-              themeContext.read<ThemeModeProvider>().toggleTheme();
-            },
-            icon: Icon(
-              Theme.of(themeContext).brightness == Brightness.light
-                  ? Icons.dark_mode
-                  : Icons.light_mode,
-            ),
-          );
-        }),
+        IconButton(
+          onPressed: () {
+            themeBloc.add(ToggleThemeEvent());
+          },
+          icon: Icon(
+            themeBloc.state.themeMode == ThemeMode.light
+                ? Icons.light_mode
+                : Icons.dark_mode,
+          ),
+        ),
       ],
     );
   }

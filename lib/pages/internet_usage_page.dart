@@ -1,9 +1,9 @@
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/usage_table.dart';
 import 'package:caspernet/pages/users_page.dart';
-import 'package:caspernet/providers/internet_usage_provider.dart';
+import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 Widget _buildLoadingIndicator() {
   return const Center(
@@ -24,30 +24,25 @@ class InternetUsagePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Consumer(
-            builder: (context, InternetUsageProvider internetUsageProvider, _) {
-              return FutureBuilder<List<UsageData>>(
-                future: Future.wait(internetUsageProvider.usageData)
-                    .timeout(const Duration(seconds: 10)),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _buildLoadingIndicator();
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('No data available: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    return SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Center(
-                          child: _buildUsageData(snapshot.data!),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return const Center(child: Text('No data available'));
-                  }
-                },
-              );
+          child: BlocBuilder<InternetUsageBloc, InternetUsageState>(
+            builder: (context, state) {
+              if (state is InternetUsageLoading) {
+                return _buildLoadingIndicator();
+              } else if (state is InternetUsageError) {
+                return Center(
+                    child: Text('No data available: ${state.message}'));
+              } else if (state is InternetUsageLoaded) {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: _buildUsageData(state.usageData),
+                    ),
+                  ),
+                );
+              } else {
+                return const Center(child: Text('No data available'));
+              }
             },
           ),
         ),

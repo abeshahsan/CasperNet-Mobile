@@ -1,23 +1,28 @@
 import 'package:caspernet/app_global.dart';
-import 'package:caspernet/providers/awesome_notification_provider.dart';
-import 'package:caspernet/providers/internet_usage_provider.dart';
-import 'package:caspernet/providers/theme_provider.dart';
+import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
+import 'package:caspernet/providers/local_notification_provider.dart';
 import 'package:caspernet/providers/router_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:caspernet/components.dart';
-import 'package:caspernet/theme_config.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:caspernet/bloc/theme/theme_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => ThemeModeProvider()),
-    ChangeNotifierProvider(create: (_) => InternetUsageProvider()),
-    ChangeNotifierProvider(create: (_) => RouterProvider()),
-    ChangeNotifierProvider(create: (_) => LocalNotificationProvider()),
-  ], child: const MyApp()));
+  runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RouterProvider()),
+        ChangeNotifierProvider(create: (_) => LocalNotificationProvider()),
+      ],
+      child: MultiBlocProvider(providers: [
+        BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
+        BlocProvider<InternetUsageBloc>(
+            create: (context) =>
+                InternetUsageBloc()..add(LoadInternetUsageEvent())),
+      ], child: const MyApp())));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,13 +30,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeModeProvider>(
-        builder: (themeProviderContext, themeProvider, __) {
+    return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+        InternetUsageBloc bloc = context.read<InternetUsageBloc>();
       return MaterialApp(
         title: 'Internet Usage',
-        theme: ThemeConfig.lightTheme(themeProviderContext),
-        darkTheme: ThemeConfig.darkTheme(themeProviderContext),
-        themeMode: themeProvider.themeMode,
+        theme: ThemeConfig.lightTheme(),
+        darkTheme: ThemeConfig.darkTheme(),
+        themeMode: state.themeMode,
         navigatorKey: AppGlobal.navigatorKey,
         home: Scaffold(
           appBar: const MyAppBar(
@@ -41,28 +46,14 @@ class MyApp extends StatelessWidget {
           floatingActionButton: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Consumer<InternetUsageProvider>(
-                builder: (context, internetUsageProvider, _) =>
-                    FloatingActionButton(
-                  shape: const CircleBorder(),
-                  onPressed: () {
-                    internetUsageProvider.refreshData();
-                  },
-                  child: const Icon(Icons.refresh),
-                ),
+              FloatingActionButton(
+                shape: const CircleBorder(),
+                onPressed: () {
+                  bloc.add(RefreshInternetUsageEvent());
+                },
+                child: const Icon(Icons.refresh),
               ),
               const SizedBox(height: 10),
-              Consumer<LocalNotificationProvider>(
-                builder: (context, awesomeNotificationProvider, _) =>
-                    FloatingActionButton(
-                  shape: const CircleBorder(),
-                  onPressed: () {
-                    print('Showing notification');
-                    awesomeNotificationProvider.showNotification();
-                  },
-                  child: const Icon(Icons.notifications),
-                ),
-              ),
             ],
           ),
         ),
