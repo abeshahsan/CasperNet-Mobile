@@ -1,8 +1,8 @@
 import 'package:caspernet/components.dart';
-import 'package:caspernet/providers/router_provider.dart';
+import 'package:caspernet/bloc/router/router_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:caspernet/accounts.dart';
-import 'package:provider/provider.dart';
 
 class UsersRoute extends StatefulWidget {
   const UsersRoute({super.key});
@@ -23,70 +23,62 @@ class _UsersRouteState extends State<UsersRoute> {
       appBar: const MyAppBar(
         title: 'Users',
       ),
-      body: Consumer<RouterProvider>(builder: (routerContext, rsProvider, _) {
-        return PopScope(
-          canPop: !selectUserOn,
-          onPopInvokedWithResult: (didPop, result) {
-            setState(() {
-              selectUserOn = false;
-            });
-          },
-          child: FutureBuilder<String>(
-            future: rsProvider.currentUser,
-            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  rsProvider.currentUser == Future.value("")) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return _snapshotErrorWidget();
-              } else {
-                return Center(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: selectUserOn
-                            ? _buildSelectUserList(snapshot, fontSize)
-                            : _buildUsersList(snapshot, fontSize),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (rsProvider.currentUser == Future.value("")) {
-                            setState(() {
-                              selectUserOn = false;
-                            });
-                            return;
-                          }
-                          setState(() {
-                            selectUserOn = !selectUserOn;
-                          });
-                        },
-                        child: const Text('Change User'),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+      body: BlocBuilder<RouterBloc, RouterState>(
+        builder: (context, state) {
+          if (state is RouterLoggingIn || state is RouterDataLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is RouterError) {
+            return _snapshotErrorWidget(state.message);
+          } else if (state is RouterLoggedIn) {
+            context.read<RouterBloc>().add(RefreshDataEvent());
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is RouterDataLoaded || state is RouterDataSent) {
+            String currentUser = state is RouterDataLoaded
+                ? state.data
+                : state is RouterDataSent
+                    ? state.data
+                    : '';
+            return Center(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: selectUserOn
+                        ? _buildSelectUserList(currentUser, fontSize)
+                        : _buildUsersList(currentUser, fontSize),
                   ),
-                );
-              }
-            },
-          ),
-        );
-      }),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectUserOn = !selectUserOn;
+                      });
+                    },
+                    child: const Text('Change User'),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          } else {
+            return _snapshotErrorWidget('No data found');
+          }
+        },
+      ),
     );
   }
 
-  Widget _snapshotErrorWidget() {
+  Widget _snapshotErrorWidget(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            'An error occurred.',
-            style: TextStyle(color: Colors.red, fontSize: 18),
+          Text(
+            'An error occurred: $message',
+            style: const TextStyle(color: Colors.red, fontSize: 18),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              setState(() {});
+              context.read<RouterBloc>().add(SetupRouterEvent());
             },
             child: const Text('Retry'),
           ),
@@ -95,7 +87,7 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget _buildUsersList(AsyncSnapshot<String> snapshot, double fontSize) {
+  Widget _buildUsersList(String currentUser, double fontSize) {
     final accounts = getAccounts();
 
     return ListView.builder(
@@ -103,7 +95,7 @@ class _UsersRouteState extends State<UsersRoute> {
       padding: const EdgeInsets.all(8.0),
       itemBuilder: (context, index) {
         var account = accounts[index];
-        bool isSelected = snapshot.data == account[0];
+        bool isSelected = currentUser == account[0];
 
         return Card(
           elevation: isSelected ? 4.0 : 1.0,
@@ -135,7 +127,7 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget _buildSelectUserList(AsyncSnapshot<String> snapshot, double fontSize) {
+  Widget _buildSelectUserList(String currentUser, double fontSize) {
     final accounts = getAccounts();
 
     return ListView.builder(
@@ -143,12 +135,15 @@ class _UsersRouteState extends State<UsersRoute> {
       padding: const EdgeInsets.all(8.0),
       itemBuilder: (context, index) {
         var account = accounts[index];
-        bool isSelected = snapshot.data == account[0];
+        bool isSelected = currentUser == account[0];
 
         return GestureDetector(
           onTap: () {
             selectUserOn = false;
-            context.read<RouterProvider>().changeUser(account);
+            context.read<RouterBloc>().add(SendDataEvent({
+                  'username': account[0],
+                  'password': account[1],
+                }));
           },
           child: Card(
             elevation: 3.0,

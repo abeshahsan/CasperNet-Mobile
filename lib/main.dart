@@ -1,26 +1,21 @@
 import 'package:caspernet/app_global.dart';
 import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
+import 'package:caspernet/bloc/router/router_bloc.dart';
 import 'package:caspernet/bloc/theme/theme_bloc.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
-import 'package:caspernet/providers/router_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => RouterProvider()),
-      ],
-      child: MultiBlocProvider(providers: [
-        BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
-        BlocProvider<InternetUsageBloc>(
-            create: (context) => InternetUsageBloc()),
-      ], child: const MyApp())));
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
+    BlocProvider<InternetUsageBloc>(create: (context) => InternetUsageBloc()),
+    BlocProvider<RouterBloc>(create: (context) => RouterBloc()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
