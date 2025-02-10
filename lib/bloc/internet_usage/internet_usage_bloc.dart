@@ -13,6 +13,8 @@ class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
   InternetUsageBloc() : super(InternetUsageInitial()) {
     on<LoadInternetUsageEvent>(_onLoadInternetUsage);
     on<RefreshInternetUsageEvent>(_onRefreshInternetUsage);
+
+    add(LoadInternetUsageEvent());
   }
 
   void _onLoadInternetUsage(

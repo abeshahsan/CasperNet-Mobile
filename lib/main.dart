@@ -1,13 +1,13 @@
 import 'package:caspernet/app_global.dart';
 import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
-import 'package:caspernet/providers/local_notification_provider.dart';
-import 'package:caspernet/providers/router_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:caspernet/bloc/theme/theme_bloc.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
-import 'package:provider/provider.dart';
+import 'package:caspernet/providers/router_provider.dart';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:caspernet/bloc/theme/theme_bloc.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,13 +15,11 @@ Future<void> main() async {
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => RouterProvider()),
-        ChangeNotifierProvider(create: (_) => LocalNotificationProvider()),
       ],
       child: MultiBlocProvider(providers: [
         BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
         BlocProvider<InternetUsageBloc>(
-            create: (context) =>
-                InternetUsageBloc()..add(LoadInternetUsageEvent())),
+            create: (context) => InternetUsageBloc()),
       ], child: const MyApp())));
 }
 
@@ -31,7 +29,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-        InternetUsageBloc bloc = context.read<InternetUsageBloc>();
       return MaterialApp(
         title: 'Internet Usage',
         theme: ThemeConfig.lightTheme(),
@@ -49,7 +46,9 @@ class MyApp extends StatelessWidget {
               FloatingActionButton(
                 shape: const CircleBorder(),
                 onPressed: () {
-                  bloc.add(RefreshInternetUsageEvent());
+                  context
+                      .read<InternetUsageBloc>()
+                      .add(RefreshInternetUsageEvent());
                 },
                 child: const Icon(Icons.refresh),
               ),
