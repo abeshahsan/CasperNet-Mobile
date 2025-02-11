@@ -11,7 +11,7 @@ abstract class InternetUsageState extends Equatable {
 }
 
 class InternetUsageInitial extends InternetUsageState {
-  const InternetUsageInitial() : super(usageData: const []);
+  InternetUsageInitial() : super(usageData: []);
 }
 
 class InternetUsageLoading extends InternetUsageState {

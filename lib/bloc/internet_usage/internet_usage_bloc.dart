@@ -1,21 +1,26 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:caspernet/accounts.dart';
 import 'package:caspernet/iusers/get_usage.dart';
 import 'package:caspernet/iusers/usage_data.dart';
-import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:meta/meta.dart';
 
 part 'internet_usage_event.dart';
 part 'internet_usage_state.dart';
 
-class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
+class InternetUsageBloc
+    extends HydratedBloc<InternetUsageEvent, InternetUsageState> {
   InternetUsageBloc() : super(InternetUsageInitial()) {
+    on<InitializeInternetUsageEvent>(_onInitializeInternetUsage);
     on<LoadInternetUsageEvent>(_onLoadInternetUsage);
     on<RefreshInternetUsageEvent>(_onRefreshInternetUsage);
+  }
 
-    add(LoadInternetUsageEvent());
+  Future<void> _onInitializeInternetUsage(InitializeInternetUsageEvent event,
+      Emitter<InternetUsageState> emit) async {
+    emit(InternetUsageLoaded(state.usageData));
   }
 
   Future<void> _loadOrRefreshInternetUsage(
@@ -27,11 +32,17 @@ class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
         accounts
             .map((account) => getUsageData(account[0], account[1]))
             .toList(),
-      ).timeout(const Duration(seconds: 10)).catchError((e) {
-        emit(InternetUsageTimeout(state.usageData));
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        return <UsageData>[];
       });
+
+      if (usageDataAll.isEmpty) {
+        emit(InternetUsageTimeout(state.usageData));
+        return;
+      }
       emit(InternetUsageLoaded(usageDataAll));
     } catch (e) {
+        print(e);
       emit(InternetUsageError(e.toString(), state.usageData));
     }
   }
@@ -44,5 +55,26 @@ class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
   void _onRefreshInternetUsage(
       RefreshInternetUsageEvent event, Emitter<InternetUsageState> emit) async {
     await _loadOrRefreshInternetUsage(emit);
+  }
+
+  @override
+  InternetUsageState? fromJson(Map<String, dynamic> json) {
+    try {
+      List<UsageData> usageData = (json['data'] as List).map((item) {
+        return UsageData.fromJson(item);
+      }).toList();
+
+      return InternetUsageLoaded(usageData);
+    } catch (e) {
+      return InternetUsageInitial();
+    }
+  }
+
+  @override
+  Map<String, dynamic>? toJson(InternetUsageState state) {
+    if (state is InternetUsageLoaded) {
+      return {'data': state.usageData.map((item) => item.toJson()).toList()};
+    }
+    return null;
   }
 }

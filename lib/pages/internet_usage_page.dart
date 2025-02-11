@@ -1,7 +1,7 @@
+import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/usage_table.dart';
 import 'package:caspernet/pages/users_page.dart';
-import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,9 +18,7 @@ class InternetUsagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // a refresh button with proper messages
         BlocBuilder<InternetUsageBloc, InternetUsageState>(
           builder: (context, state) {
             String message;
@@ -30,8 +28,10 @@ class InternetUsagePage extends StatelessWidget {
               message = "Error. Try again";
             } else if (state is InternetUsageLoaded) {
               message = "Data fetched";
+            } else if (state is InternetUsageTimeout) {
+              message = "Fetch timed out. Try again";
             } else {
-              message = "Messages will appear here";
+              message = "Unknown error. Try again";
             }
 
             return Row(
@@ -39,7 +39,7 @@ class InternetUsagePage extends StatelessWidget {
               children: [
                 Text(
                   message,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 11),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
@@ -73,14 +73,16 @@ class InternetUsagePage extends StatelessWidget {
                   state is InternetUsageLoaded ||
                   state is InternetUsageError ||
                   state is InternetUsageTimeout) {
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: _buildUsageData(state.usageData),
+                return Stack(children: [
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: _buildUsageData(state.usageData),
+                      ),
                     ),
                   ),
-                );
+                ]);
               } else {
                 return const Center(child: Text('No data available'));
               }
@@ -89,21 +91,19 @@ class InternetUsagePage extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Builder(
-            builder: (BuildContext builderContext) => ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  builderContext,
-                  MaterialPageRoute(builder: (context) => const UsersRoute()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UsersRoute()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
               ),
-              child: const Text('See Users'),
             ),
+            child: const Text('See Users'),
           ),
         ),
       ],

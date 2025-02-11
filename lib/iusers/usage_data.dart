@@ -48,21 +48,28 @@ class UsageData {
     };
   }
 
-  factory UsageData.fromMap(Map<String, String> map) {
+  factory UsageData.fromMap(Map<String, dynamic> map) {
     return UsageData(
       username: map['username'] as String,
       fullName: map['fullName'] as String,
       studentId: map['studentId'] as String,
-      totalUse: int.parse(map['totalUse'] as String),
-      estimatedBill: int.parse(map['estimatedBill'] as String),
-      extraUse: int.parse(map['extraUse'] as String),
+      totalUse: map['totalUse'] is int
+          ? map['totalUse']
+          : int.parse(map['totalUse'] as String),
+      estimatedBill: map['estimatedBill'] is int
+          ? map['estimatedBill']
+          : int.parse(map['estimatedBill'] as String),
+      extraUse: map['extraUse'] is int
+          ? map['extraUse']
+          : int.parse(map['extraUse'] as String),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory UsageData.fromJson(String source) =>
-      UsageData.fromMap(json.decode(source) as Map<String, String>);
+  factory UsageData.fromJson(String source) {
+    return UsageData.fromMap(json.decode(source) as Map<String, dynamic>);
+  }
 
   @override
   String toString() {
@@ -72,23 +79,22 @@ class UsageData {
   @override
   bool operator ==(covariant UsageData other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.username == username &&
-      other.fullName == fullName &&
-      other.studentId == studentId &&
-      other.totalUse == totalUse &&
-      other.estimatedBill == estimatedBill &&
-      other.extraUse == extraUse;
+
+    return other.username == username &&
+        other.fullName == fullName &&
+        other.studentId == studentId &&
+        other.totalUse == totalUse &&
+        other.estimatedBill == estimatedBill &&
+        other.extraUse == extraUse;
   }
 
   @override
   int get hashCode {
     return username.hashCode ^
-      fullName.hashCode ^
-      studentId.hashCode ^
-      totalUse.hashCode ^
-      estimatedBill.hashCode ^
-      extraUse.hashCode;
+        fullName.hashCode ^
+        studentId.hashCode ^
+        totalUse.hashCode ^
+        estimatedBill.hashCode ^
+        extraUse.hashCode;
   }
 }
