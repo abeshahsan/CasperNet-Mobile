@@ -37,8 +37,8 @@ class MyAppBarState extends State<MyAppBar> {
           },
           icon: Icon(
             themeBloc.state.themeMode == ThemeMode.light
-                ? Icons.light_mode
-                : Icons.dark_mode,
+                ? Icons.dark_mode
+                : Icons.light_mode,
           ),
         ),
       ],

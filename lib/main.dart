@@ -4,12 +4,19 @@ import 'package:caspernet/bloc/router/router_bloc.dart';
 import 'package:caspernet/bloc/theme/theme_bloc.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
-
+import 'package:flutter/foundation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: kIsWeb
+          ? HydratedStorageDirectory.web
+          : HydratedStorageDirectory((await getTemporaryDirectory()).path));
 
   runApp(MultiBlocProvider(providers: [
     BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
@@ -35,21 +42,6 @@ class MyApp extends StatelessWidget {
             title: 'Internet Usage',
           ),
           body: const InternetUsagePage(),
-          floatingActionButton: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FloatingActionButton(
-                shape: const CircleBorder(),
-                onPressed: () {
-                  context
-                      .read<InternetUsageBloc>()
-                      .add(RefreshInternetUsageEvent());
-                },
-                child: const Icon(Icons.refresh),
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
         ),
       );
     });

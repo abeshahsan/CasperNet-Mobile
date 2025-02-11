@@ -28,45 +28,44 @@ class _UsersRouteState extends State<UsersRoute> {
           if (state is RouterLoggingIn || state is RouterDataLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is RouterError) {
-            return _snapshotErrorWidget(state.message);
+            return errorWidget(state.message);
           } else if (state is RouterLoggedIn) {
             context.read<RouterBloc>().add(RefreshDataEvent());
             return const Center(child: CircularProgressIndicator());
-          } else if (state is RouterDataLoaded || state is RouterDataSent) {
-            String currentUser = state is RouterDataLoaded
-                ? state.data
-                : state is RouterDataSent
-                    ? state.data
-                    : '';
-            return Center(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: selectUserOn
-                        ? _buildSelectUserList(currentUser, fontSize)
-                        : _buildUsersList(currentUser, fontSize),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        selectUserOn = !selectUserOn;
-                      });
-                    },
-                    child: const Text('Change User'),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            );
+          } else if (state is RouterDataLoaded) {
+            return _mainContainer(state.data, fontSize);
+          } else if (state is RouterDataSent) {
+            return _mainContainer(state.data, fontSize);
           } else {
-            return _snapshotErrorWidget('No data found');
+            return errorWidget('No data found');
           }
         },
       ),
     );
   }
 
-  Widget _snapshotErrorWidget(String message) {
+  Widget _mainContainer(String currentUser, double fontSize) {
+    return Center(
+      child: Column(
+        children: [
+          Expanded(
+            child: _buildUserList(currentUser, fontSize, selectUserOn),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                selectUserOn = !selectUserOn;
+              });
+            },
+            child: const Text('Change User'),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget errorWidget(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -87,47 +86,8 @@ class _UsersRouteState extends State<UsersRoute> {
     );
   }
 
-  Widget _buildUsersList(String currentUser, double fontSize) {
-    final accounts = getAccounts();
-
-    return ListView.builder(
-      itemCount: accounts.length,
-      padding: const EdgeInsets.all(8.0),
-      itemBuilder: (context, index) {
-        var account = accounts[index];
-        bool isSelected = currentUser == account[0];
-
-        return Card(
-          elevation: isSelected ? 4.0 : 1.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: ListTile(
-            title: Text(
-              account[0],
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: fontSize,
-                color:
-                    isSelected ? Theme.of(context).colorScheme.primary : null,
-              ),
-            ),
-            leading: CircleAvatar(
-              backgroundColor: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.secondary,
-              child: const Icon(Icons.account_circle, color: Colors.blue),
-            ),
-            trailing: isSelected
-                ? const Icon(Icons.check_circle, color: Colors.green, size: 24)
-                : null,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSelectUserList(String currentUser, double fontSize) {
+  Widget _buildUserList(
+      String currentUser, double fontSize, bool isSelectable) {
     final accounts = getAccounts();
 
     return ListView.builder(
@@ -138,15 +98,17 @@ class _UsersRouteState extends State<UsersRoute> {
         bool isSelected = currentUser == account[0];
 
         return GestureDetector(
-          onTap: () {
-            selectUserOn = false;
-            context.read<RouterBloc>().add(SendDataEvent({
-                  'username': account[0],
-                  'password': account[1],
-                }));
-          },
+          onTap: isSelectable
+              ? () {
+                  selectUserOn = false;
+                  context.read<RouterBloc>().add(SendDataEvent({
+                        'username': account[0],
+                        'password': account[1],
+                      }));
+                }
+              : null,
           child: Card(
-            elevation: 3.0,
+            elevation: isSelected ? 4.0 : 1.0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
               side: isSelected
@@ -157,17 +119,24 @@ class _UsersRouteState extends State<UsersRoute> {
               title: Text(
                 account[0],
                 style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: fontSize,
+                  color:
+                      isSelected ? Theme.of(context).colorScheme.primary : null,
                 ),
               ),
               leading: CircleAvatar(
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.secondary,
                 child: const Icon(Icons.account_circle, color: Colors.blue),
               ),
               trailing: isSelected
                   ? const Icon(Icons.check_circle,
                       color: Colors.green, size: 24)
-                  : const Icon(Icons.circle_outlined, color: Colors.grey),
+                  : isSelectable
+                      ? const Icon(Icons.circle_outlined, color: Colors.grey)
+                      : null,
             ),
           ),
         );
