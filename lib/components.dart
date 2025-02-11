@@ -29,11 +29,11 @@ class MyAppBarState extends State<MyAppBar> {
     ThemeBloc themeBloc = BlocProvider.of<ThemeBloc>(context);
     return AppBar(
       title: Text(widget.title),
-      //   backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       actions: [
         IconButton(
           onPressed: () {
-            themeBloc.add(ToggleThemeEvent());
+            themeBloc.add(ThemeToggleEvent());
           },
           icon: Icon(
             themeBloc.state.themeMode == ThemeMode.light
