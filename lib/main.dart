@@ -1,72 +1,49 @@
-// import 'package:caspernet/get_usage.dart';
+import 'package:caspernet/app_global.dart';
+import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
+import 'package:caspernet/bloc/router/router_bloc.dart';
+import 'package:caspernet/bloc/theme/theme_bloc.dart';
+import 'package:caspernet/components.dart';
+import 'package:caspernet/pages/internet_usage_page.dart';
+import 'package:flutter/foundation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:caspernet/get_usage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
-import 'accounts.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() => runApp(const MyApp());
+  HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: kIsWeb
+          ? HydratedStorageDirectory.web
+          : HydratedStorageDirectory((await getTemporaryDirectory()).path));
 
-class MyApp extends StatefulWidget {
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
+    BlocProvider<InternetUsageBloc>(create: (context) => InternetUsageBloc()),
+    BlocProvider<RouterBloc>(create: (context) => RouterBloc()),
+  ], child: const MyApp()));
+}
+
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late List<Future<UsageData>> usageDataAll;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-
-  Widget _buildUsageData(List<UsageData> usageDataList) {
-    return Column(
-      children: usageDataList.map((data) => Text(data.toString())).toList(),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    List<List> accounts = getAccounts();
-    usageDataAll =
-        accounts.map((account) => loginIusers(account[0], account[1])).toList();
-
-    return MaterialApp(
-      title: 'Internet Usage',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Fetch Data Example'),
+    return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+      return MaterialApp(
+        title: 'Internet Usage',
+        theme: ThemeConfig.lightTheme(),
+        darkTheme: ThemeConfig.darkTheme(),
+        themeMode: state.themeMode,
+        navigatorKey: AppGlobal.navigatorKey,
+        home: Scaffold(
+          appBar: const MyAppBar(
+            title: 'Internet Usage',
+          ),
+          body: const InternetUsagePage(),
         ),
-        body: FutureBuilder<List<UsageData>>(
-          future: Future.wait(usageDataAll),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildLoadingIndicator();
-            } else if (snapshot.hasError) {
-              return Center(child: Text('${snapshot.error}'));
-            } else if (snapshot.hasData) {
-              return SingleChildScrollView(
-                child: Center(
-                  child: _buildUsageData(snapshot.data!),
-                ),
-              );
-            } else {
-              return const Center(child: Text('No data available'));
-            }
-          },
-        ),
-      ),
-    );
+      );
+    });
   }
 }
