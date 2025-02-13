@@ -6,6 +6,7 @@ import 'package:caspernet/iusers/usage_data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'internet_usage_event.dart';
 part 'internet_usage_state.dart';
@@ -19,7 +20,8 @@ class InternetUsageBloc
 
   Future<void> _onInitializeInternetUsage(InitializeInternetUsageEvent event,
       Emitter<InternetUsageState> emit) async {
-    await _loadOrRefreshInternetUsage(emit);
+    await _loadFromSharedPreferences(emit);
+    // await _loadOrRefreshInternetUsage(emit);
   }
 
   Future<void> _loadOrRefreshInternetUsage(
@@ -40,10 +42,33 @@ class InternetUsageBloc
         return;
       }
       emit(InternetUsageLoaded(usageDataAll));
+      await _saveToSharedPreferences(usageDataAll);
     } catch (e) {
       print(e);
       emit(InternetUsageError(e.toString(), state.usageData));
     }
+  }
+
+  Future<void> _saveToSharedPreferences(List<UsageData> usageData) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> jsonData =
+        usageData.map((data) => data.toJson().toString()).toList();
+    await prefs.setStringList('usageData', jsonData);
+  }
+
+  Future<void> _loadFromSharedPreferences(
+      Emitter<InternetUsageState> emit) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? jsonData = prefs.getStringList('usageData');
+
+    if (jsonData == null) {
+      emit(InternetUsageEmpty());
+      return;
+    }
+
+    List<UsageData> usageData =
+        jsonData.map((data) => UsageData.fromJson(data)).toList();
+    emit(InternetUsageLoaded(usageData));
   }
 
   void _onRefreshInternetUsage(

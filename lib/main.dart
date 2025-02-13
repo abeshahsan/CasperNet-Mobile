@@ -1,28 +1,59 @@
-import 'package:caspernet/app_global.dart';
+import 'package:caspernet/bg_services.dart';
 import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
 import 'package:caspernet/bloc/router/router_bloc.dart';
 import 'package:caspernet/bloc/theme/theme_bloc.dart';
 import 'package:caspernet/components.dart';
 import 'package:caspernet/pages/internet_usage_page.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService(); // Initialize the notification service
+
+  // Initialize WorkManager
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: kDebugMode || kProfileMode,
+  );
+
+  // Cancel any previously scheduled task
+  await Workmanager().cancelByUniqueName("notification_internet_usage");
+  await Workmanager().cancelByUniqueName("update_internet_usage");
+
+  // Start background task
+  await Workmanager().registerPeriodicTask(
+    "notification_internet_usage",
+    "notification_internet_usage",
+    frequency: const Duration(hours: 2),
+  );
+
+  await Workmanager().registerPeriodicTask(
+    "update_internet_usage",
+    "update_internet_usage",
+    frequency: const Duration(hours: 2),
+  );
 
   HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: kIsWeb
           ? HydratedStorageDirectory.web
-          : HydratedStorageDirectory((await getTemporaryDirectory()).path));
+          : HydratedStorageDirectory(
+              (await getApplicationDocumentsDirectory()).path));
 
-  runApp(MultiBlocProvider(providers: [
-    BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
-    BlocProvider<InternetUsageBloc>(create: (context) => InternetUsageBloc()),
-    BlocProvider<RouterBloc>(create: (context) => RouterBloc()),
-  ], child: const MyApp()));
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
+      BlocProvider<InternetUsageBloc>(create: (context) => InternetUsageBloc()),
+      BlocProvider<RouterBloc>(create: (context) => RouterBloc()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -36,7 +67,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeConfig.lightTheme(),
         darkTheme: ThemeConfig.darkTheme(),
         themeMode: state.themeMode,
-        navigatorKey: AppGlobal.navigatorKey,
         home: Scaffold(
           appBar: const MyAppBar(
             title: 'Internet Usage',
