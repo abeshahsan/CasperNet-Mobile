@@ -10,8 +10,8 @@ abstract class InternetUsageState extends Equatable {
   List<Object?> get props => [usageData];
 }
 
-class InternetUsageInitial extends InternetUsageState {
-  InternetUsageInitial() : super(usageData: []);
+class InternetUsageEmpty extends InternetUsageState {
+  InternetUsageEmpty() : super(usageData: []);
 }
 
 class InternetUsageLoading extends InternetUsageState {

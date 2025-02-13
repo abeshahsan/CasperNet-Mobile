@@ -5,9 +5,9 @@ import 'package:caspernet/pages/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-Widget _buildUsageData(List<UsageData>? usageDataList) {
-  if (usageDataList == null) {
-    return const Text('No data available');
+Widget _buildUsageData(List<UsageData> usageDataList) {
+  if (usageDataList.isEmpty) {
+    return const Text('Loading...');
   }
   return UsageTable(usageDataList);
 }
@@ -69,7 +69,12 @@ class InternetUsagePage extends StatelessWidget {
           child: BlocBuilder<InternetUsageBloc, InternetUsageState>(
             // buildWhen: (previous, current) => current is InternetUsageLoaded,
             builder: (context, state) {
-              if (state is InternetUsageLoading ||
+              if (state is InternetUsageEmpty) {
+                context
+                    .read<InternetUsageBloc>()
+                    .add(InitializeInternetUsageEvent());
+                return const Center(child: Text('Loading...'));
+              } else if (state is InternetUsageLoading ||
                   state is InternetUsageLoaded ||
                   state is InternetUsageError ||
                   state is InternetUsageTimeout) {
@@ -84,7 +89,7 @@ class InternetUsagePage extends StatelessWidget {
                   ),
                 ]);
               } else {
-                return const Center(child: Text('No data available'));
+                return const Center(child: Text('Unknown error. Restart app'));
               }
             },
           ),

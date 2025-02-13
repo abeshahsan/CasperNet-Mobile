@@ -12,15 +12,14 @@ part 'internet_usage_state.dart';
 
 class InternetUsageBloc
     extends HydratedBloc<InternetUsageEvent, InternetUsageState> {
-  InternetUsageBloc() : super(InternetUsageInitial()) {
+  InternetUsageBloc() : super(InternetUsageEmpty()) {
     on<InitializeInternetUsageEvent>(_onInitializeInternetUsage);
-    on<LoadInternetUsageEvent>(_onLoadInternetUsage);
     on<RefreshInternetUsageEvent>(_onRefreshInternetUsage);
   }
 
   Future<void> _onInitializeInternetUsage(InitializeInternetUsageEvent event,
       Emitter<InternetUsageState> emit) async {
-    emit(InternetUsageLoaded(state.usageData));
+    await _loadOrRefreshInternetUsage(emit);
   }
 
   Future<void> _loadOrRefreshInternetUsage(
@@ -42,14 +41,9 @@ class InternetUsageBloc
       }
       emit(InternetUsageLoaded(usageDataAll));
     } catch (e) {
-        print(e);
+      print(e);
       emit(InternetUsageError(e.toString(), state.usageData));
     }
-  }
-
-  void _onLoadInternetUsage(
-      LoadInternetUsageEvent event, Emitter<InternetUsageState> emit) async {
-    await _loadOrRefreshInternetUsage(emit);
   }
 
   void _onRefreshInternetUsage(
@@ -66,7 +60,7 @@ class InternetUsageBloc
 
       return InternetUsageLoaded(usageData);
     } catch (e) {
-      return InternetUsageInitial();
+      return InternetUsageEmpty();
     }
   }
 

@@ -5,7 +5,6 @@ abstract class InternetUsageEvent {}
 
 class InitializeInternetUsageEvent extends InternetUsageEvent {}
 
-class LoadInternetUsageEvent extends InternetUsageEvent {}
 
 class RefreshInternetUsageEvent extends InternetUsageEvent {
     RefreshInternetUsageEvent();
