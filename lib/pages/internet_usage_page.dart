@@ -31,7 +31,7 @@ class InternetUsagePage extends StatelessWidget {
               children: [
                 Text(
                   message,
-                  style: const TextStyle(fontSize: 11),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(width: 8),
                 IconButton(

@@ -7,6 +7,7 @@ class ThemeConfig {
   // Light Theme
   static ThemeData lightTheme() => ThemeData(
         useMaterial3: true,
+        fontFamily: 'GGSans',
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: _seedColor,
@@ -36,6 +37,7 @@ class ThemeConfig {
   static ThemeData darkTheme() => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
+        fontFamily: 'GGSans',
         colorScheme: ColorScheme.fromSeed(
           seedColor: _seedColor,
           brightness: Brightness.dark,
@@ -61,24 +63,25 @@ class ThemeConfig {
 
   // Shared Text Theme
   static TextTheme _textTheme(Brightness brightness) => TextTheme(
-        displayLarge: GoogleFonts.oswald(
-          fontSize: 72,
+        displayLarge: TextStyle(
           fontWeight: FontWeight.bold,
           color: brightness == Brightness.light ? Colors.black : Colors.white,
         ),
-        titleLarge: GoogleFonts.oswald(
-          fontSize: 24,
+        titleLarge: TextStyle(
           fontWeight: FontWeight.w600,
           color:
               brightness == Brightness.light ? Colors.black87 : Colors.white70,
         ),
-        bodyMedium: GoogleFonts.merriweather(
-          fontSize: 16,
+        headlineMedium: TextStyle(
+          fontWeight: FontWeight.w600,
           color:
               brightness == Brightness.light ? Colors.black87 : Colors.white70,
         ),
-        displaySmall: GoogleFonts.pacifico(
-          fontSize: 18,
+        bodyMedium: TextStyle(
+          color:
+              brightness == Brightness.light ? Colors.black87 : Colors.white70,
+        ),
+        displaySmall: TextStyle(
           color:
               brightness == Brightness.light ? Colors.black54 : Colors.white60,
         ),
@@ -93,7 +96,7 @@ class ThemeConfig {
           backgroundColor: brightness == Brightness.light
               ? _seedColor.shade200
               : _seedColor.shade400, // Fixed issue with shade
-          textStyle: GoogleFonts.oswald(fontWeight: FontWeight.w600),
+          textStyle: TextStyle(fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -111,7 +114,7 @@ class ThemeConfig {
                 ? _seedColor
                 : _seedColor.shade200,
           ),
-          textStyle: GoogleFonts.oswald(fontWeight: FontWeight.w500),
+          textStyle: TextStyle(fontWeight: FontWeight.w500),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),

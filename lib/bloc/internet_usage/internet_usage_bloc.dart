@@ -4,9 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:caspernet/accounts.dart';
 import 'package:caspernet/iusers/get_usage.dart';
 import 'package:caspernet/iusers/usage_data.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'internet_usage_event.dart';
@@ -22,7 +20,6 @@ class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
 
   Future<void> _onInitializeInternetUsage(
       InternetUsageInit event, Emitter<InternetUsageState> emit) async {
-    debugPrint('InitializeInternetUsageEvent');
     List<UsageData> storageData = await _loadFromSharedPreferences(emit);
 
     if (storageData.isNotEmpty) {
@@ -79,8 +76,6 @@ class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
       if (jsonData == null) {
         throw Exception('No data found');
       }
-
-      debugPrint(jsonData.toString());
 
       List<UsageData> usageData =
           jsonData.map((data) => UsageData.fromJson(data)).toList();
