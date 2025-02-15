@@ -31,6 +31,7 @@ Future<void> main() async {
   await Workmanager().registerPeriodicTask(
     "notification_internet_usage",
     "notification_internet_usage",
+    initialDelay: const Duration(days: 2),
     frequency: const Duration(days: 2),
   );
 
