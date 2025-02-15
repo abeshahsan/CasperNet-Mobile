@@ -1,14 +1,23 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
+  static final NotificationService _instance = NotificationService._internal();
+
+  static Future<NotificationService> getInstance() async {
+    if (!_instance._isInitialized) {
+      await _instance._initialize();
+    }
+    return _instance;
+  }
+
+  NotificationService._internal();
+
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   late final NotificationDetails platformChannelSpecifics;
 
-  NotificationService() {
-    _initialize();
-  }
+  bool _isInitialized = false;
 
   Future<void> _initialize() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -33,14 +42,22 @@ class NotificationService {
     platformChannelSpecifics = const NotificationDetails(
       android: androidPlatformChannelSpecifics,
     );
+
+    _isInitialized = true;
   }
 
+
+
   Future<void> showNotification(Map<String, dynamic> data) async {
-    await flutterLocalNotificationsPlugin.show(
-      data['id'],
-      data['title'],
-      data['body'],
-      platformChannelSpecifics,
-    );
+    try {
+      await flutterLocalNotificationsPlugin.show(
+        data['id'],
+        data['title'],
+        data['body'],
+        platformChannelSpecifics,
+      );
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 }

@@ -1,24 +1,31 @@
 import 'dart:convert';
+
 import 'package:caspernet/accounts.dart';
 import 'package:caspernet/iusers/usage_data.dart';
+import 'package:caspernet/notification_service.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'iusers/get_usage.dart';
-import 'notification_service.dart';
 
+@pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    if (task == "increment_counter") {
-      await _updateInternetUsage();
-    } else if (task == "notification_internet_usage") {
-      List<UsageData> usageData = await _loadFromSharedPreferences();
-      await _showNotification(usageData);
+    try {
+      if (task == "notification_internet_usage") {
+        // List<UsageData> usageData = await _loadFromSharedPreferences();
+        await _showNotification(<UsageData>[]);
+      }
+      return Future.value(true);
+    } catch (e) {
+      debugPrint('Error executing task: $e');
+      return Future.value(false);
     }
-    return Future.value(true);
   });
 }
 
+// ignore: unused_element
 Future<void> _updateInternetUsage() async {
   final prefs = await SharedPreferences.getInstance();
 
@@ -43,6 +50,7 @@ Future<void> _updateInternetUsage() async {
   }
 }
 
+// ignore: unused_element
 Future<List<UsageData>> _loadFromSharedPreferences() async {
   final prefs = await SharedPreferences.getInstance();
   List<String> jsonData = prefs.getStringList('usageData') ?? <String>[];
@@ -64,5 +72,12 @@ Future<void> _showNotification(List<UsageData> usageData) async {
     'title': 'Internet Usage',
     'body': 'Check your internet usage',
   };
-  await NotificationService().showNotification(data);
+  try {
+    NotificationService notificationService =
+        await NotificationService.getInstance();
+    notificationService.showNotification(data);
+  } catch (e) {
+    debugPrint('Failed to show notification: $e');
+    throw Exception('Failed to show notification: $e');
+  }
 }

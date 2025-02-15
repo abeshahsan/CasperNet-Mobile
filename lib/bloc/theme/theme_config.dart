@@ -70,20 +70,20 @@ class ThemeConfig {
         titleLarge: TextStyle(
           fontWeight: FontWeight.w600,
           color:
-              brightness == Brightness.light ? Colors.black87 : Colors.white70,
+              brightness == Brightness.light ? Colors.black : Colors.white,
         ),
         headlineMedium: TextStyle(
           fontWeight: FontWeight.w600,
           color:
-              brightness == Brightness.light ? Colors.black87 : Colors.white70,
+              brightness == Brightness.light ? Colors.black : Colors.white,
         ),
         bodyMedium: TextStyle(
           color:
-              brightness == Brightness.light ? Colors.black87 : Colors.white70,
+              brightness == Brightness.light ? Colors.black : Colors.white,
         ),
         displaySmall: TextStyle(
           color:
-              brightness == Brightness.light ? Colors.black54 : Colors.white60,
+              brightness == Brightness.light ? Colors.black : Colors.white,
         ),
       );
 
