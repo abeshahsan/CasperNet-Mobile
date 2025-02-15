@@ -1,18 +1,20 @@
 part of 'internet_usage_bloc.dart';
 
 @immutable
-abstract class InternetUsageState extends Equatable {
+abstract class InternetUsageState {
   final List<UsageData> usageData;
 
   const InternetUsageState({required this.usageData});
-
-  @override
-  List<Object?> get props => [usageData];
 }
 
-class InternetUsageEmpty extends InternetUsageState {
-  InternetUsageEmpty() : super(usageData: []);
+class InternetUsageEmptyStorage extends InternetUsageState {
+  InternetUsageEmptyStorage() : super(usageData: []);
 }
+
+// class InternetUsageEmptyFetch extends InternetUsageState {
+//   const InternetUsageEmptyFetch(List<UsageData> previousUsageData)
+//       : super(usageData: previousUsageData);
+// }
 
 class InternetUsageLoading extends InternetUsageState {
   const InternetUsageLoading(List<UsageData> previousUsageData)

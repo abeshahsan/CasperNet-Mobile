@@ -1,4 +1,3 @@
-import 'package:caspernet/bg_services.dart';
 import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
 import 'package:caspernet/bloc/router/router_bloc.dart';
 import 'package:caspernet/bloc/theme/theme_bloc.dart';
@@ -11,6 +10,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'bg_services.dart';
 import 'notification_service.dart';
 
 Future<void> main() async {
@@ -24,21 +24,21 @@ Future<void> main() async {
   );
 
   // Cancel any previously scheduled task
-  await Workmanager().cancelByUniqueName("notification_internet_usage");
-  await Workmanager().cancelByUniqueName("update_internet_usage");
+//   await Workmanager().cancelByUniqueName("notification_internet_usage");
+//   await Workmanager().cancelByUniqueName("update_internet_usage");
 
-  // Start background task
-  await Workmanager().registerPeriodicTask(
-    "notification_internet_usage",
-    "notification_internet_usage",
-    frequency: const Duration(hours: 2),
-  );
+//   // Start background task
+//   await Workmanager().registerPeriodicTask(
+//     "notification_internet_usage",
+//     "notification_internet_usage",
+//     frequency: const Duration(hours: 2),
+//   );
 
-  await Workmanager().registerPeriodicTask(
-    "update_internet_usage",
-    "update_internet_usage",
-    frequency: const Duration(hours: 2),
-  );
+//   await Workmanager().registerPeriodicTask(
+//     "update_internet_usage",
+//     "update_internet_usage",
+//     frequency: const Duration(hours: 2),
+//   );
 
   HydratedBloc.storage = await HydratedStorage.build(
       storageDirectory: kIsWeb

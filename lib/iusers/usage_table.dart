@@ -11,6 +11,15 @@ class UsageTable extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth * 0.04; // Adjust the multiplier as needed
 
+    if (dataList.isEmpty) {
+      return Center(
+        child: Text(
+          'No data available',
+          style: TextStyle(fontSize: fontSize + 2),
+        ),
+      );
+    }
+
     return Table(
       border: TableBorder.all(color: Colors.grey),
       columnWidths: const {

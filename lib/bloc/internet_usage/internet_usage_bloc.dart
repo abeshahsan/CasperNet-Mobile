@@ -1,27 +1,40 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:caspernet/accounts.dart';
 import 'package:caspernet/iusers/get_usage.dart';
 import 'package:caspernet/iusers/usage_data.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'internet_usage_event.dart';
 part 'internet_usage_state.dart';
 
-class InternetUsageBloc
-    extends HydratedBloc<InternetUsageEvent, InternetUsageState> {
-  InternetUsageBloc() : super(InternetUsageEmpty()) {
-    on<InitializeInternetUsageEvent>(_onInitializeInternetUsage);
-    on<RefreshInternetUsageEvent>(_onRefreshInternetUsage);
+class InternetUsageBloc extends Bloc<InternetUsageEvent, InternetUsageState> {
+  InternetUsageBloc() : super(InternetUsageEmptyStorage()) {
+    on<InternetUsageInit>(_onInitializeInternetUsage);
+    on<InternetUsageSync>(_onRefreshInternetUsage);
+
+    add(InternetUsageInit());
   }
 
-  Future<void> _onInitializeInternetUsage(InitializeInternetUsageEvent event,
-      Emitter<InternetUsageState> emit) async {
-    await _loadFromSharedPreferences(emit);
-    // await _loadOrRefreshInternetUsage(emit);
+  Future<void> _onInitializeInternetUsage(
+      InternetUsageInit event, Emitter<InternetUsageState> emit) async {
+    debugPrint('InitializeInternetUsageEvent');
+    List<UsageData> storageData = await _loadFromSharedPreferences(emit);
+
+    if (storageData.isNotEmpty) {
+      emit(InternetUsageLoaded(storageData));
+    } else {
+      add(InternetUsageSync());
+    }
+  }
+
+  void _onRefreshInternetUsage(
+      InternetUsageSync event, Emitter<InternetUsageState> emit) async {
+    await _loadOrRefreshInternetUsage(emit);
   }
 
   Future<void> _loadOrRefreshInternetUsage(
@@ -38,13 +51,13 @@ class InternetUsageBloc
       });
 
       if (usageDataAll.isEmpty) {
-        emit(InternetUsageTimeout(state.usageData));
-        return;
+        throw Exception('No data found');
       }
-      emit(InternetUsageLoaded(usageDataAll));
+
       await _saveToSharedPreferences(usageDataAll);
+      emit(InternetUsageLoaded(usageDataAll));
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       emit(InternetUsageError(e.toString(), state.usageData));
     }
   }
@@ -56,44 +69,26 @@ class InternetUsageBloc
     await prefs.setStringList('usageData', jsonData);
   }
 
-  Future<void> _loadFromSharedPreferences(
+  Future<List<UsageData>> _loadFromSharedPreferences(
       Emitter<InternetUsageState> emit) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String>? jsonData = prefs.getStringList('usageData');
-
-    if (jsonData == null) {
-      emit(InternetUsageEmpty());
-      return;
-    }
-
-    List<UsageData> usageData =
-        jsonData.map((data) => UsageData.fromJson(data)).toList();
-    emit(InternetUsageLoaded(usageData));
-  }
-
-  void _onRefreshInternetUsage(
-      RefreshInternetUsageEvent event, Emitter<InternetUsageState> emit) async {
-    await _loadOrRefreshInternetUsage(emit);
-  }
-
-  @override
-  InternetUsageState? fromJson(Map<String, dynamic> json) {
     try {
-      List<UsageData> usageData = (json['data'] as List).map((item) {
-        return UsageData.fromJson(item);
-      }).toList();
+      emit(InternetUsageLoading(state.usageData));
+      final prefs = await SharedPreferences.getInstance();
+      List<String>? jsonData = prefs.getStringList('usageData');
 
-      return InternetUsageLoaded(usageData);
+      if (jsonData == null) {
+        throw Exception('No data found');
+      }
+
+      debugPrint(jsonData.toString());
+
+      List<UsageData> usageData =
+          jsonData.map((data) => UsageData.fromJson(data)).toList();
+      return usageData;
     } catch (e) {
-      return InternetUsageEmpty();
+      debugPrint(e.toString());
+      emit(InternetUsageError(e.toString(), state.usageData));
+      return <UsageData>[];
     }
-  }
-
-  @override
-  Map<String, dynamic>? toJson(InternetUsageState state) {
-    if (state is InternetUsageLoaded) {
-      return {'data': state.usageData.map((item) => item.toJson()).toList()};
-    }
-    return null;
   }
 }

@@ -1,16 +1,8 @@
 import 'package:caspernet/bloc/internet_usage/internet_usage_bloc.dart';
-import 'package:caspernet/iusers/usage_data.dart';
 import 'package:caspernet/iusers/usage_table.dart';
 import 'package:caspernet/pages/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-Widget _buildUsageData(List<UsageData> usageDataList) {
-  if (usageDataList.isEmpty) {
-    return const Text('Loading...');
-  }
-  return UsageTable(usageDataList);
-}
 
 class InternetUsagePage extends StatelessWidget {
   const InternetUsagePage({super.key});
@@ -25,13 +17,13 @@ class InternetUsagePage extends StatelessWidget {
             if (state is InternetUsageLoading) {
               message = "Fetching data...";
             } else if (state is InternetUsageError) {
-              message = "Error. Try again";
+              message = "Error. Refresh";
             } else if (state is InternetUsageLoaded) {
               message = "Data fetched";
             } else if (state is InternetUsageTimeout) {
-              message = "Fetch timed out. Try again";
+              message = "Fetch timed out. Refresh";
             } else {
-              message = "Unknown error. Try again";
+              message = "Unknown error. Refresh";
             }
 
             return Row(
@@ -47,9 +39,7 @@ class InternetUsagePage extends StatelessWidget {
                     if (state is InternetUsageLoading) {
                       return;
                     }
-                    context
-                        .read<InternetUsageBloc>()
-                        .add(RefreshInternetUsageEvent());
+                    context.read<InternetUsageBloc>().add(InternetUsageSync());
                   },
                   icon: state is InternetUsageLoading
                       ? SizedBox(
@@ -69,12 +59,7 @@ class InternetUsagePage extends StatelessWidget {
           child: BlocBuilder<InternetUsageBloc, InternetUsageState>(
             // buildWhen: (previous, current) => current is InternetUsageLoaded,
             builder: (context, state) {
-              if (state is InternetUsageEmpty) {
-                context
-                    .read<InternetUsageBloc>()
-                    .add(InitializeInternetUsageEvent());
-                return const Center(child: Text('Loading...'));
-              } else if (state is InternetUsageLoading ||
+              if (state is InternetUsageLoading ||
                   state is InternetUsageLoaded ||
                   state is InternetUsageError ||
                   state is InternetUsageTimeout) {
@@ -83,7 +68,7 @@ class InternetUsagePage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Center(
-                        child: _buildUsageData(state.usageData),
+                        child: UsageTable(state.usageData),
                       ),
                     ),
                   ),
